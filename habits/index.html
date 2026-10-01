@@ -1,0 +1,697 @@
+<title>Tony 習慣打卡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width column. Today's four habits, a 2×2 grid of streak counters, then the month as color blocks (same order as Notion's 進度). */
+:root {
+  --bg: #F3F5F8;
+  --surface: #FFFFFF;
+  --ink: #1B2130;
+  --muted: #646E82;
+  --line: #E0E4EB;
+  --empty: #E5E8EE;
+  --wake: #D58A18;
+  --am: #2A9381;
+  --pm: #585DCF;
+  --move: #DD5139;
+  --focus: #585DCF;
+  --font-display: "Bricolage Grotesque", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1219; --surface: #171B24; --ink: #E7EAF1; --muted: #8E96A8; --line: #272C38; --empty: #232836;
+    --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --focus: #8E92F2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1219; --surface: #171B24; --ink: #E7EAF1; --muted: #8E96A8; --line: #272C38; --empty: #232836;
+  --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --focus: #8E92F2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  padding-inline: 16px;
+  padding-block: 20px 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { max-width: 520px; margin: 0 auto; display: grid; gap: 22px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+
+/* Header */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--muted); margin: 0 0 2px; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.wake-line { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.wake-line b { color: var(--ink); font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.refresh { display: grid; justify-items: end; gap: 4px; flex-shrink: 0; }
+.refresh button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.refresh button:disabled { opacity: .55; cursor: default; }
+.stamp { font-size: 12px; color: var(--muted); }
+
+/* Notice */
+.notice {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+.notice strong { display: block; margin-bottom: 2px; }
+
+/* Today pills */
+.today { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pill {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 4px 9px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  text-align: center;
+  min-width: 0;
+}
+.pill .mark {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 2px dashed var(--line);
+  font-weight: 700; font-size: 14px;
+  color: var(--surface);
+}
+.pill.done { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); }
+.pill.done .mark { background: var(--c); border: 2px solid var(--c); }
+.pill.off { opacity: .5; }
+.pill .name { line-height: 1.25; }
+
+/* Streak cards */
+.section-title { font-size: 13px; color: var(--muted); letter-spacing: .06em; margin: 0 0 10px; }
+.streaks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  display: grid;
+  gap: 2px;
+  position: relative;
+  min-width: 0;
+}
+.card .head { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex-shrink: 0; }
+.card .big {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 1;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--c);
+}
+.card .big small { font-family: var(--font-body); font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.card .meta { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card .rule { font-size: 11.5px; color: var(--muted); opacity: .85; }
+.badge {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 11.5px; font-weight: 700;
+  color: var(--surface); background: var(--c);
+  padding: 2px 8px; border-radius: 999px;
+}
+.card.record .big { animation: pop 1.2s ease-out 1; }
+@keyframes pop { 0% { transform: scale(.7); } 45% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+/* Calendar */
+.cal { background: var(--surface); border-radius: 18px; padding: 14px 12px 12px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 20px; margin: 0; font-variant-numeric: tabular-nums; }
+.nav { display: flex; gap: 6px; }
+.nav button {
+  width: 34px; height: 34px; border-radius: 10px;
+  border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: 17px; line-height: 1;
+}
+.nav button:disabled { opacity: .35; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.wd { text-align: center; font-size: 12px; color: var(--muted); padding-bottom: 2px; }
+.wd.we { opacity: .7; }
+.day {
+  border: 0; background: transparent; padding: 3px 2px 4px; border-radius: 10px;
+  display: grid; justify-items: center; gap: 3px; cursor: pointer; min-width: 0;
+}
+.day .num { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); line-height: 1.2; }
+.blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: min(38px, 9vw); aspect-ratio: 1; }
+.blocks i { border-radius: 3px; background: var(--empty); }
+.blocks i.on { background: var(--c); }
+.day.future { cursor: default; }
+.day.future .blocks { opacity: .4; }
+.day.today .num { color: var(--ink); font-weight: 700; }
+.day.today .blocks { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+.day.sel { background: var(--bg); }
+.detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; min-height: 2.6em; }
+.detail .d { font-weight: 700; margin-right: 6px; }
+.detail .item { white-space: nowrap; margin-right: 10px; }
+.detail .item.no { color: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+footer p { margin: 0; }
+
+/* Celebration */
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg);
+  padding: 11px 18px; border-radius: 999px; font-weight: 700; font-size: 15px;
+  z-index: 21; max-width: calc(100% - 32px); text-align: center;
+  animation: rise .35s ease-out;
+}
+@keyframes rise { from { transform: translate(-50%, 16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .card.record .big, .toast { animation: none; }
+}
+@media (max-width: 360px) {
+  h1 { font-size: 29px; }
+  .card .big { font-size: 40px; }
+  .pill { font-size: 12px; }
+}
+</style>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow">生活管家｜習慣打卡</p>
+      <h1 id="todayTitle">今天</h1>
+      <p class="wake-line" id="wakeLine">讀取中…</p>
+    </div>
+    <div class="refresh">
+      <button type="button" id="refreshBtn">重新整理</button>
+      <span class="stamp" id="stamp"></span>
+    </div>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <section aria-labelledby="todayLabel">
+    <h2 class="section-title" id="todayLabel">今天</h2>
+    <div class="today" id="todayPills"></div>
+  </section>
+
+  <section aria-labelledby="streakLabel">
+    <h2 class="section-title" id="streakLabel">連續天數</h2>
+    <div class="streaks" id="streaks"></div>
+  </section>
+
+  <section class="cal" aria-label="習慣月曆">
+    <div class="cal-head">
+      <h2 id="monthTitle"></h2>
+      <div class="nav">
+        <button type="button" id="prevMonth" aria-label="上個月">‹</button>
+        <button type="button" id="nextMonth" aria-label="下個月">›</button>
+      </div>
+    </div>
+    <div class="grid" id="calGrid"></div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <footer>
+    <p>資料直接讀 Notion「✅ 習慣打卡」。要打卡，跟管家說「5:50 起床」「冥想了」就好。</p>
+    <p>凌晨 4 點前算前一天。早起是 06:00 前起床；運動只算平日，週末有動不會斷，也不算進連續天數。</p>
+  </footer>
+</main>
+
+<script>
+// <logic>
+const HABITS = [
+  { key: "早起", color: "--wake", weekdayOnly: false, rule: "06:00 前起床" },
+  { key: "晨間冥想", color: "--am", weekdayOnly: false, rule: "早上做" },
+  { key: "睡前冥想", color: "--pm", weekdayOnly: false, rule: "睡前做" },
+  { key: "運動", color: "--move", weekdayOnly: true, rule: "只算平日，週末不會斷" },
+];
+const WEEK = ["日", "一", "二", "三", "四", "五", "六"];
+
+function addDays(iso, n) {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function dow(iso) { return new Date(iso + "T00:00:00Z").getUTCDay(); }
+function isWeekend(iso) { const w = dow(iso); return w === 0 || w === 6; }
+// The butler's "today": Taipei time, and 00:00–03:59 still counts as the previous day.
+function butlerToday(ms) { return new Date(ms + (8 - 4) * 3600e3).toISOString().slice(0, 10); }
+function rowDate(raw) {
+  if (!raw) return null;
+  if (raw.length <= 10) return raw;
+  const ms = Date.parse(raw);
+  return isNaN(ms) ? raw.slice(0, 10) : new Date(ms + 8 * 3600e3).toISOString().slice(0, 10);
+}
+const isYes = (v) => v === true || v === "__YES__";
+
+function normalize(results) {
+  const days = new Map();
+  for (const r of results) {
+    if (isYes(r["測試資料"])) continue;
+    if (String(r["標題"] || "").startsWith("【測試】")) continue;
+    const d = rowDate(r["date:日期:start"]);
+    if (!d) continue;
+    const day = days.get(d) || { date: d, wake: "", 早起: false, 晨間冥想: false, 睡前冥想: false, 運動: false };
+    for (const h of HABITS) day[h.key] = day[h.key] || isYes(r[h.key]);
+    const w = String(r["起床時間"] || "").trim();
+    if (w && !day.wake) day.wake = w;
+    days.set(d, day);
+  }
+  return days;
+}
+
+function prevSlot(iso, weekdayOnly) {
+  let p = addDays(iso, -1);
+  if (weekdayOnly) while (isWeekend(p)) p = addDays(p, -1);
+  return p;
+}
+
+function habitStats(days, habit, today) {
+  const wk = habit.weekdayOnly;
+  const done = (d) => !!(days.get(d) && days.get(d)[habit.key]);
+
+  // Where counting starts: today if it's already ticked, otherwise the previous slot.
+  // For 運動 on a weekend, start from this Friday.
+  let start = today;
+  if (wk && isWeekend(start)) { while (isWeekend(start)) start = addDays(start, -1); }
+  else if (!done(start)) start = prevSlot(start, wk);
+
+  let current = 0, runStart = null, c = start;
+  while (done(c)) { current++; runStart = c; c = prevSlot(c, wk); }
+
+  const dates = [...days.keys()].filter((d) => d <= today && done(d) && !(wk && isWeekend(d))).sort();
+  const runs = [];
+  let cur = null;
+  for (const d of dates) {
+    if (cur && prevSlot(d, wk) === cur.end) { cur.end = d; cur.len++; }
+    else { cur = { start: d, end: d, len: 1 }; runs.push(cur); }
+  }
+  const longest = runs.reduce((m, r) => Math.max(m, r.len), 0);
+  const prevBest = runs.filter((r) => !(current > 0 && r.start === runStart)).reduce((m, r) => Math.max(m, r.len), 0);
+  const month = today.slice(0, 7);
+  const monthCount = [...days.keys()].filter((d) => d.startsWith(month) && d <= today && done(d)).length;
+
+  return { current, runStart, longest, prevBest, monthCount, isRecord: current >= 2 && current > prevBest, doneToday: done(today) };
+}
+// </logic>
+
+const $ = (s) => document.querySelector(s);
+const VIEW_URL = "view://3eb49a21-5d5f-814e-a753-000cb29b66cd";
+const CACHE_KEY = "habits-cache-v1";
+const CELEBRATED_KEY = "habits-celebrated-v1";
+
+const state = { days: new Map(), fetchedAt: null, month: null, selected: null, loading: false, lastTry: 0 };
+
+function store(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+function recall(key) { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; } }
+
+function fmtDay(iso) {
+  const [, m, d] = iso.split("-").map(Number);
+  return `${m}/${d}（${WEEK[dow(iso)]}）`;
+}
+function fmtStamp(ms) {
+  if (!ms) return "";
+  const mins = Math.round((Date.now() - ms) / 60000);
+  if (mins < 1) return "剛剛更新";
+  if (mins < 60) return `${mins} 分鐘前更新`;
+  const t = new Date(ms + 8 * 3600e3);
+  return `更新於 ${t.getUTCMonth() + 1}/${t.getUTCDate()} ${String(t.getUTCHours()).padStart(2, "0")}:${String(t.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+function render() {
+  const today = butlerToday(Date.now());
+  if (!state.month) state.month = today.slice(0, 7);
+  const day = state.days.get(today);
+
+  $("#todayTitle").textContent = fmtDay(today);
+  const wake = $("#wakeLine");
+  wake.textContent = "";
+  if (day && day.wake) {
+    wake.append("起床 ");
+    const b = document.createElement("b");
+    b.textContent = day.wake;
+    wake.append(b);
+  } else {
+    wake.textContent = state.fetchedAt ? "還沒記起床時間，跟管家說一聲就好" : state.loading ? "讀取中…" : "還沒讀到資料";
+  }
+  $("#stamp").textContent = fmtStamp(state.fetchedAt);
+
+  // Today pills
+  const pills = $("#todayPills");
+  pills.textContent = "";
+  for (const h of HABITS) {
+    const done = !!(day && day[h.key]);
+    const off = h.weekdayOnly && isWeekend(today) && !done;
+    const el = document.createElement("div");
+    el.className = "pill" + (done ? " done" : "") + (off ? " off" : "");
+    el.style.setProperty("--c", `var(${h.color})`);
+    el.innerHTML = `<span class="mark" aria-hidden="true">${done ? "✓" : ""}</span><span class="name"></span>`;
+    el.querySelector(".name").textContent = h.key;
+    el.setAttribute("aria-label", `${h.key}：${done ? "完成" : off ? "週末不用" : "還沒"}`);
+    pills.append(el);
+  }
+
+  // Streak cards
+  const wrap = $("#streaks");
+  wrap.textContent = "";
+  const records = [];
+  for (const h of HABITS) {
+    const s = habitStats(state.days, h, today);
+    const card = document.createElement("article");
+    card.className = "card" + (s.isRecord ? " record" : "");
+    card.style.setProperty("--c", `var(${h.color})`);
+    card.innerHTML = `
+      <div class="head"><span class="swatch"></span><span class="label"></span></div>
+      <div class="big">${s.current}<small>天</small></div>
+      <div class="meta">最長 ${s.longest} 天｜本月 ${s.monthCount} 天</div>
+      <div class="rule"></div>`;
+    card.querySelector(".label").textContent = h.key;
+    card.querySelector(".rule").textContent = h.rule;
+    if (s.isRecord) {
+      const b = document.createElement("span");
+      b.className = "badge";
+      b.textContent = "新紀錄";
+      card.append(b);
+      records.push({ h, s });
+    }
+    wrap.append(card);
+  }
+
+  renderCalendar(today);
+  if (state.fetchedAt) celebrate(records);
+}
+
+function renderCalendar(today) {
+  const [y, m] = state.month.split("-").map(Number);
+  $("#monthTitle").textContent = `${y} 年 ${m} 月`;
+  $("#nextMonth").disabled = state.month >= today.slice(0, 7);
+
+  const grid = $("#calGrid");
+  grid.textContent = "";
+  ["一", "二", "三", "四", "五", "六", "日"].forEach((w, i) => {
+    const el = document.createElement("div");
+    el.className = "wd" + (i >= 5 ? " we" : "");
+    el.textContent = w;
+    grid.append(el);
+  });
+
+  const first = `${state.month}-01`;
+  const offset = (dow(first) + 6) % 7;
+  for (let i = 0; i < offset; i++) grid.append(document.createElement("span"));
+
+  const nextFirst = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
+  const last = addDays(nextFirst, -1);
+  for (let d = first; d <= last; d = addDays(d, 1)) {
+    const rec = state.days.get(d);
+    const future = d > today;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "day" + (future ? " future" : "") + (d === today ? " today" : "") + (d === state.selected ? " sel" : "");
+    btn.disabled = future;
+    const doneNames = HABITS.filter((h) => rec && rec[h.key]).map((h) => h.key);
+    btn.setAttribute("aria-label", `${fmtDay(d)}${doneNames.length ? "：" + doneNames.join("、") : "：沒有打卡"}`);
+    const blocks = HABITS.map((h) => `<i class="${rec && rec[h.key] ? "on" : ""}" style="--c:var(${h.color})"></i>`).join("");
+    btn.innerHTML = `<span class="num">${Number(d.slice(8))}</span><span class="blocks" aria-hidden="true">${blocks}</span>`;
+    btn.addEventListener("click", () => { state.selected = d; renderCalendar(today); });
+    grid.append(btn);
+  }
+
+  renderDetail(today);
+}
+
+function renderDetail(today) {
+  const box = $("#detail");
+  box.textContent = "";
+  const d = state.selected || today;
+  const rec = state.days.get(d);
+  const head = document.createElement("span");
+  head.className = "d";
+  head.textContent = fmtDay(d);
+  box.append(head);
+  if (!rec) {
+    box.append(state.fetchedAt && state.days.size === 0
+      ? "還沒有任何打卡紀錄。跟管家說「5:50 起床」或「冥想了」，這裡就會出現。"
+      : "這天沒有打卡紀錄");
+    return;
+  }
+  const items = [];
+  if (rec.wake) items.push([`起床 ${rec.wake}`, true]);
+  for (const h of HABITS) items.push([`${h.key} ${rec[h.key] ? "✓" : "—"}`, rec[h.key]]);
+  for (const [text, ok] of items) {
+    const s = document.createElement("span");
+    s.className = "item" + (ok ? "" : " no");
+    s.textContent = text;
+    box.append(s, " ");
+  }
+}
+
+function renderLegend() {
+  const lg = $("#legend");
+  lg.textContent = "";
+  for (const h of HABITS) {
+    const s = document.createElement("span");
+    s.innerHTML = `<i class="swatch" style="--c:var(${h.color})"></i>`;
+    s.append(h.key);
+    lg.append(s);
+  }
+  const note = document.createElement("span");
+  note.textContent = "每格四塊，順序跟 Notion 的進度一樣";
+  lg.append(note);
+}
+
+// Record-breaking celebration: once per habit per new streak length.
+function celebrate(records) {
+  if (!records.length) return;
+  const seen = recall(CELEBRATED_KEY) || {};
+  const fresh = records.filter(({ h, s }) => {
+    const k = `${h.key}@${s.runStart}`;
+    return !(seen[k] >= s.current);
+  });
+  if (!fresh.length) return;
+  for (const { h, s } of fresh) seen[`${h.key}@${s.runStart}`] = s.current;
+  store(CELEBRATED_KEY, seen);
+
+  const css = getComputedStyle(document.documentElement);
+  const colors = fresh.map(({ h }) => css.getPropertyValue(h.color).trim()).concat(HABITS.map((h) => css.getPropertyValue(h.color).trim()));
+  const msg = fresh.map(({ h, s }) => `${h.key}連續 ${s.current} 天`).join("、");
+  toast(`🎉 新紀錄！${msg}`);
+  confetti(colors);
+}
+
+function toast(text) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.setAttribute("role", "status");
+  t.textContent = text;
+  document.body.append(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+function confetti(colors) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("#fx");
+  const ctx = cv.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = window.innerWidth, H = window.innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const ps = Array.from({ length: 110 }, () => ({
+    x: W / 2 + (Math.random() - 0.5) * 60,
+    y: H * 0.38,
+    vx: (Math.random() - 0.5) * 11,
+    vy: -Math.random() * 10 - 4,
+    r: Math.random() * 6 + 4,
+    c: colors[Math.floor(Math.random() * colors.length)],
+    a: Math.random() * 6.28,
+    va: (Math.random() - 0.5) * 0.35,
+  }));
+  const t0 = performance.now();
+  let last = t0;
+  function step(t) {
+    const dt = Math.min(2, (t - last) / 16);
+    last = t;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of ps) {
+      p.vy += 0.28 * dt; p.vx *= 0.99;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.a += p.va * dt;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2);
+      ctx.restore();
+    }
+    if (t - t0 < 2600) requestAnimationFrame(step);
+    else ctx.clearRect(0, 0, W, H);
+  }
+  requestAnimationFrame(step);
+}
+
+// ---- Notion via the viewer's connector ----
+function showNotice(title, body) {
+  const n = $("#notice");
+  if (!title) { n.hidden = true; return; }
+  n.textContent = "";
+  const s = document.createElement("strong");
+  s.textContent = title;
+  n.append(s, body || "");
+  n.hidden = false;
+}
+
+function explain(err) {
+  const code = err && err.code;
+  switch (code) {
+    case "server_not_connected":
+    case "server_not_found":
+      return ["還沒連上 Notion", "到 claude.ai 的設定 → 連接器加入 Notion，再回來按重新整理。"];
+    case "needs_reauth":
+      return ["Notion 的登入過期了", "到 claude.ai 的設定 → 連接器重新連一次 Notion。"];
+    case "selection_required":
+      return ["要先選一個 Notion 連接器", "你連了不只一個 Notion，claude.ai 會請你選一個，選好再按重新整理。"];
+    case "not_in_manifest":
+    case "consent_required":
+      return ["這個頁面還沒被允許讀 Notion", "按重新整理，跳出詢問時選允許。"];
+    case "blocked_by_policy":
+    case "approval_required":
+      return ["帳號設定不允許讀 Notion", "這個頁面被帳號的管理設定擋住了。"];
+    case "not_granted":
+    case "capability_disabled":
+    case "capability_removed":
+      return ["這裡讀不到 Notion", "請在 claude.ai 裡打開這個頁面。"];
+    case "server_unavailable":
+    case "rate_limited":
+      return ["Notion 暫時連不上", "等一下再按重新整理。"];
+    case "tool_error":
+      return ["Notion 回報錯誤", err.message || ""];
+    case "bad_payload":
+      return ["看不懂 Notion 回傳的資料", err.message || ""];
+    default:
+      return ["讀取失敗", (err && err.message) || "等一下再按重新整理。"];
+  }
+}
+
+let mcpPromise = null;
+function getMcp() {
+  if (!mcpPromise) {
+    mcpPromise = window.claude && window.claude.use ? window.claude.use("mcp").catch(() => null) : Promise.resolve(null);
+  }
+  return mcpPromise;
+}
+
+async function queryPage(mcp, cursor, fresh) {
+  const data = { mode: "view", view_url: VIEW_URL, page_size: 100 };
+  if (cursor) data.start_cursor = cursor;
+  const opts = { cache: fresh ? { refresh: true } : { staleTime: 30000 } };
+  let res;
+  try {
+    res = await mcp.callTool("Notion", "notion-query-data-sources", { data }, opts);
+  } catch (err) {
+    if (!err || !err.retryable) throw err;
+    await new Promise((r) => setTimeout(r, (err.retryAfterMs || 1200) + Math.random() * 800));
+    res = await mcp.callTool("Notion", "notion-query-data-sources", { data }, opts);
+  }
+  let p = res.payload;
+  if (typeof p === "string") {
+    try { p = JSON.parse(p); } catch (e) { throw { code: "bad_payload", message: p.slice(0, 160) }; }
+  }
+  if (!p || !Array.isArray(p.results)) throw { code: "bad_payload", message: "回傳裡沒有紀錄清單" };
+  return { page: p, storedAt: res.cache ? res.cache.storedAt : Date.now() };
+}
+
+async function load(fresh) {
+  if (state.loading) return;
+  state.loading = true;
+  state.lastTry = Date.now();
+  const btn = $("#refreshBtn");
+  btn.disabled = true;
+  btn.textContent = "讀取中…";
+  if (!state.fetchedAt) render();
+  try {
+    const mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    const rows = [];
+    let cursor = null, storedAt = Date.now();
+    for (let i = 0; i < 20; i++) {
+      const { page, storedAt: at } = await queryPage(mcp, cursor, fresh);
+      if (i === 0) storedAt = at;
+      rows.push(...page.results);
+      if (!page.has_more || !page.next_cursor) break;
+      cursor = page.next_cursor;
+    }
+    state.days = normalize(rows);
+    state.fetchedAt = storedAt;
+    store(CACHE_KEY, { rows, fetchedAt: storedAt });
+    showNotice(null);
+  } catch (err) {
+    const [title, body] = explain(err);
+    const stale = state.fetchedAt ? `（下面是 ${fmtStamp(state.fetchedAt).replace("更新", "")}的資料）` : "";
+    showNotice(title, body + stale);
+    if (["needs_reauth", "server_not_connected", "blocked_by_policy", "approval_required", "not_in_manifest"].includes(err && err.code)) {
+      state.days = new Map();
+      state.fetchedAt = null;
+    }
+  } finally {
+    state.loading = false;
+    btn.disabled = false;
+    btn.textContent = "重新整理";
+    render();
+  }
+}
+
+// Boot: show the last copy right away, then fetch.
+(function boot() {
+  const cached = recall(CACHE_KEY);
+  if (cached && Array.isArray(cached.rows)) {
+    state.days = normalize(cached.rows);
+    state.fetchedAt = cached.fetchedAt || null;
+  }
+  renderLegend();
+  render();
+  $("#refreshBtn").addEventListener("click", () => load(true));
+  $("#prevMonth").addEventListener("click", () => {
+    const [y, m] = state.month.split("-").map(Number);
+    state.month = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`;
+    renderCalendar(butlerToday(Date.now()));
+  });
+  $("#nextMonth").addEventListener("click", () => {
+    const [y, m] = state.month.split("-").map(Number);
+    state.month = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+    renderCalendar(butlerToday(Date.now()));
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && Date.now() - state.lastTry > 60000) load(false);
+  });
+  load(false);
+})();
+</script>
