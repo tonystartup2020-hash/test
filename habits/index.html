@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
-/* Layout: one phone-width column. Today's four habits, a 2×2 grid of streak counters, then the month as color blocks (same order as Notion's 進度). */
+/* Layout: one phone-width column. Today's six habits (morning row, evening row), one row per streak counter, then the month as 3×2 color blocks in the same order as Notion's 進度. */
 :root {
   --bg: #F3F5F8;
   --surface: #FFFFFF;
@@ -15,6 +15,9 @@
   --am: #2A9381;
   --pm: #585DCF;
   --move: #DD5139;
+  --meal: #6E9417;
+  --sleep: #9A47B3;
+  --holiday: #C8372D;
   --focus: #585DCF;
   --font-display: "Bricolage Grotesque", "Noto Sans TC", system-ui, sans-serif;
   --font-body: "Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -22,13 +25,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0F1219; --surface: #171B24; --ink: #E7EAF1; --muted: #8E96A8; --line: #272C38; --empty: #232836;
-    --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --focus: #8E92F2;
+    --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --meal: #A8CB4C; --sleep: #CB89E4; --holiday: #F2806F; --focus: #8E92F2;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0F1219; --surface: #171B24; --ink: #E7EAF1; --muted: #8E96A8; --line: #272C38; --empty: #232836;
-  --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --focus: #8E92F2;
+  --wake: #F0A93E; --am: #46B8A4; --pm: #8E92F2; --move: #F27B63; --meal: #A8CB4C; --sleep: #CB89E4; --holiday: #F2806F; --focus: #8E92F2;
   color-scheme: dark;
 }
 
@@ -84,64 +87,66 @@ h1 {
 .notice strong { display: block; margin-bottom: 2px; }
 
 /* Today pills */
-.today { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.today { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .pill {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: 10px 4px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
-  font-size: 13px;
-  text-align: center;
+  font-size: 13.5px;
   min-width: 0;
 }
 .pill .mark {
-  width: 26px; height: 26px; border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
   display: grid; place-items: center;
   border: 2px dashed var(--line);
-  font-weight: 700; font-size: 14px;
+  font-weight: 700; font-size: 12px;
   color: var(--surface);
 }
 .pill.done { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); }
 .pill.done .mark { background: var(--c); border: 2px solid var(--c); }
 .pill.off { opacity: .5; }
-.pill .name { line-height: 1.25; }
+.pill .text { display: grid; min-width: 0; }
+.pill .name { line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill .sub { font-size: 11px; color: var(--muted); line-height: 1.2; }
 
-/* Streak cards */
+/* Streak list */
 .section-title { font-size: 13px; color: var(--muted); letter-spacing: .06em; margin: 0 0 10px; }
-.streaks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.card {
-  background: var(--surface);
-  border-radius: 16px;
-  padding: 14px 14px 12px;
+.streaks { background: var(--surface); border-radius: 18px; padding: 4px 16px; display: grid; }
+.row {
   display: grid;
-  gap: 2px;
-  position: relative;
-  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
 }
-.card .head { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; }
+.row:first-child { border-top: 0; }
+.row .info { display: grid; gap: 1px; min-width: 0; }
+.row .head { display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 500; flex-wrap: wrap; }
 .swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex-shrink: 0; }
-.card .big {
+.row .meta { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .rule { font-size: 11.5px; color: var(--muted); opacity: .85; }
+.row .big {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 46px;
+  font-size: 40px;
   line-height: 1;
-  margin-top: 6px;
   font-variant-numeric: tabular-nums;
   color: var(--c);
+  text-align: right;
 }
-.card .big small { font-family: var(--font-body); font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
-.card .meta { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.card .rule { font-size: 11.5px; color: var(--muted); opacity: .85; }
+.row .big small { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.row.waiting .big { color: var(--muted); opacity: .6; }
 .badge {
-  position: absolute; top: 12px; right: 12px;
-  font-size: 11.5px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   color: var(--surface); background: var(--c);
-  padding: 2px 8px; border-radius: 999px;
+  padding: 1px 8px; border-radius: 999px;
 }
-.card.record .big { animation: pop 1.2s ease-out 1; }
+.row.record .big { animation: pop 1.2s ease-out 1; }
 @keyframes pop { 0% { transform: scale(.7); } 45% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
 /* Calendar */
@@ -159,15 +164,17 @@ h1 {
 .wd.we { opacity: .7; }
 .day {
   border: 0; background: transparent; padding: 3px 2px 4px; border-radius: 10px;
-  display: grid; justify-items: center; gap: 3px; cursor: pointer; min-width: 0;
+  display: block; cursor: pointer; min-width: 0; width: 100%;
 }
+.day .inner { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .day .num { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); line-height: 1.2; }
-.blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: min(38px, 9vw); aspect-ratio: 1; }
-.blocks i { border-radius: 3px; background: var(--empty); }
+.blocks { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; width: min(38px, 9vw); aspect-ratio: 3 / 2; }
+.blocks i { border-radius: 2px; background: var(--empty); }
 .blocks i.on { background: var(--c); }
 .day.future { cursor: default; }
 .day.future .blocks { opacity: .4; }
 .day.today .num { color: var(--ink); font-weight: 700; }
+.day.holiday .num { color: var(--holiday); }
 .day.today .blocks { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
 .day.sel { background: var(--bg); }
 .detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; min-height: 2.6em; }
@@ -194,12 +201,12 @@ footer p { margin: 0; }
 @keyframes rise { from { transform: translate(-50%, 16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .card.record .big, .toast { animation: none; }
+  .row.record .big, .toast { animation: none; }
 }
 @media (max-width: 360px) {
   h1 { font-size: 29px; }
-  .card .big { font-size: 40px; }
-  .pill { font-size: 12px; }
+  .row .big { font-size: 34px; }
+  .pill { font-size: 12px; padding: 8px; gap: 6px; }
 }
 </style>
 
@@ -243,19 +250,24 @@ footer p { margin: 0; }
   </section>
 
   <footer>
-    <p>資料直接讀 Notion「✅ 習慣打卡」。要打卡，跟管家說「5:50 起床」「冥想了」就好。</p>
-    <p>凌晨 4 點前算前一天。早起是 06:00 前起床；運動只算平日，週末有動不會斷，也不算進連續天數。</p>
+    <p>資料直接讀 Notion「✅ 習慣打卡」。要打卡，跟管家說「5:50 起床」「冥想了」「要睡了」就好。</p>
+    <p>凌晨 4 點前算前一天。早起是 06:00 前起床，早睡是 23:00 前就寢。運動和健康早餐只算平日，週末有沒有做都不會斷；健康早餐連國定假日也不算（月曆上紅色的日期）。運動從 10/6 開始算。</p>
   </footer>
 </main>
 
 <script>
 // <logic>
+// Order follows the day, same as Notion's 進度 formula.
 const HABITS = [
-  { key: "早起", color: "--wake", weekdayOnly: false, rule: "06:00 前起床" },
-  { key: "晨間冥想", color: "--am", weekdayOnly: false, rule: "早上做" },
-  { key: "睡前冥想", color: "--pm", weekdayOnly: false, rule: "睡前做" },
-  { key: "運動", color: "--move", weekdayOnly: true, rule: "只算平日，週末不會斷" },
+  { key: "早起", color: "--wake", rule: "06:00 前起床" },
+  { key: "晨間冥想", color: "--am", rule: "早上做" },
+  { key: "健康早餐", color: "--meal", weekdayOnly: true, skipHolidays: true, rule: "只算平日，週末和國定假日不會斷" },
+  { key: "運動", color: "--move", weekdayOnly: true, start: "2026-10-06", rule: "只算平日，週末不會斷" },
+  { key: "睡前冥想", color: "--pm", rule: "睡前做" },
+  { key: "早睡", color: "--sleep", rule: "23:00 前就寢" },
 ];
+// Weekday national holidays and make-up days off (行政院人事行政總處辦公日曆). Add 2027 once it is published.
+const HOLIDAYS = new Set(["2026-10-09", "2026-10-26", "2026-12-25"]);
 const WEEK = ["日", "一", "二", "三", "四", "五", "六"];
 
 function addDays(iso, n) {
@@ -265,6 +277,10 @@ function addDays(iso, n) {
 }
 function dow(iso) { return new Date(iso + "T00:00:00Z").getUTCDay(); }
 function isWeekend(iso) { const w = dow(iso); return w === 0 || w === 6; }
+// A day the habit doesn't apply: it neither counts nor breaks the streak.
+function isOff(iso, habit) {
+  return (habit.weekdayOnly && isWeekend(iso)) || (habit.skipHolidays && HOLIDAYS.has(iso));
+}
 // The butler's "today": Taipei time, and 00:00–03:59 still counts as the previous day.
 function butlerToday(ms) { return new Date(ms + (8 - 4) * 3600e3).toISOString().slice(0, 10); }
 function rowDate(raw) {
@@ -282,39 +298,41 @@ function normalize(results) {
     if (String(r["標題"] || "").startsWith("【測試】")) continue;
     const d = rowDate(r["date:日期:start"]);
     if (!d) continue;
-    const day = days.get(d) || { date: d, wake: "", 早起: false, 晨間冥想: false, 睡前冥想: false, 運動: false };
-    for (const h of HABITS) day[h.key] = day[h.key] || isYes(r[h.key]);
+    const day = days.get(d) || { date: d, wake: "", bed: "" };
+    for (const h of HABITS) day[h.key] = !!day[h.key] || isYes(r[h.key]);
     const w = String(r["起床時間"] || "").trim();
     if (w && !day.wake) day.wake = w;
+    const bed = String(r["就寢時間"] || "").trim();
+    if (bed && !day.bed) day.bed = bed;
     days.set(d, day);
   }
   return days;
 }
 
-function prevSlot(iso, weekdayOnly) {
+function prevSlot(iso, habit) {
   let p = addDays(iso, -1);
-  if (weekdayOnly) while (isWeekend(p)) p = addDays(p, -1);
+  while (isOff(p, habit)) p = addDays(p, -1);
   return p;
 }
 
 function habitStats(days, habit, today) {
-  const wk = habit.weekdayOnly;
-  const done = (d) => !!(days.get(d) && days.get(d)[habit.key]);
+  const started = (d) => !habit.start || d >= habit.start;
+  const done = (d) => started(d) && !!(days.get(d) && days.get(d)[habit.key]);
 
   // Where counting starts: today if it's already ticked, otherwise the previous slot.
-  // For 運動 on a weekend, start from this Friday.
+  // On a day the habit doesn't apply (weekend, holiday), start from the last day it did.
   let start = today;
-  if (wk && isWeekend(start)) { while (isWeekend(start)) start = addDays(start, -1); }
-  else if (!done(start)) start = prevSlot(start, wk);
+  if (isOff(start, habit)) { while (isOff(start, habit)) start = addDays(start, -1); }
+  else if (!done(start)) start = prevSlot(start, habit);
 
   let current = 0, runStart = null, c = start;
-  while (done(c)) { current++; runStart = c; c = prevSlot(c, wk); }
+  while (done(c)) { current++; runStart = c; c = prevSlot(c, habit); }
 
-  const dates = [...days.keys()].filter((d) => d <= today && done(d) && !(wk && isWeekend(d))).sort();
+  const dates = [...days.keys()].filter((d) => d <= today && done(d) && !isOff(d, habit)).sort();
   const runs = [];
   let cur = null;
   for (const d of dates) {
-    if (cur && prevSlot(d, wk) === cur.end) { cur.end = d; cur.len++; }
+    if (cur && prevSlot(d, habit) === cur.end) { cur.end = d; cur.len++; }
     else { cur = { start: d, end: d, len: 1 }; runs.push(cur); }
   }
   const longest = runs.reduce((m, r) => Math.max(m, r.len), 0);
@@ -322,7 +340,12 @@ function habitStats(days, habit, today) {
   const month = today.slice(0, 7);
   const monthCount = [...days.keys()].filter((d) => d.startsWith(month) && d <= today && done(d)).length;
 
-  return { current, runStart, longest, prevBest, monthCount, isRecord: current >= 2 && current > prevBest, doneToday: done(today) };
+  return {
+    current, runStart, longest, prevBest, monthCount,
+    isRecord: current >= 2 && current > prevBest,
+    doneToday: done(today),
+    notStarted: !started(today),
+  };
 }
 // </logic>
 
@@ -372,40 +395,48 @@ function render() {
   pills.textContent = "";
   for (const h of HABITS) {
     const done = !!(day && day[h.key]);
-    const off = h.weekdayOnly && isWeekend(today) && !done;
+    const sub = !done && h.start && today < h.start ? `${Number(h.start.slice(5, 7))}/${Number(h.start.slice(8))} 起`
+      : !done && isOff(today, h) ? (HOLIDAYS.has(today) ? "假日" : "週末") : "";
     const el = document.createElement("div");
-    el.className = "pill" + (done ? " done" : "") + (off ? " off" : "");
+    el.className = "pill" + (done ? " done" : "") + (sub ? " off" : "");
     el.style.setProperty("--c", `var(${h.color})`);
-    el.innerHTML = `<span class="mark" aria-hidden="true">${done ? "✓" : ""}</span><span class="name"></span>`;
+    el.innerHTML = `<span class="mark" aria-hidden="true">${done ? "✓" : ""}</span><span class="text"><span class="name"></span><span class="sub"></span></span>`;
     el.querySelector(".name").textContent = h.key;
-    el.setAttribute("aria-label", `${h.key}：${done ? "完成" : off ? "週末不用" : "還沒"}`);
+    el.querySelector(".sub").textContent = sub;
+    if (!sub) el.querySelector(".sub").remove();
+    el.setAttribute("aria-label", `${h.key}：${done ? "完成" : sub || "還沒"}`);
     pills.append(el);
   }
 
-  // Streak cards
+  // Streak rows
   const wrap = $("#streaks");
   wrap.textContent = "";
   const records = [];
   for (const h of HABITS) {
     const s = habitStats(state.days, h, today);
-    const card = document.createElement("article");
-    card.className = "card" + (s.isRecord ? " record" : "");
-    card.style.setProperty("--c", `var(${h.color})`);
-    card.innerHTML = `
-      <div class="head"><span class="swatch"></span><span class="label"></span></div>
-      <div class="big">${s.current}<small>天</small></div>
-      <div class="meta">最長 ${s.longest} 天｜本月 ${s.monthCount} 天</div>
-      <div class="rule"></div>`;
-    card.querySelector(".label").textContent = h.key;
-    card.querySelector(".rule").textContent = h.rule;
+    const row = document.createElement("article");
+    row.className = "row" + (s.isRecord ? " record" : "") + (s.notStarted ? " waiting" : "");
+    row.style.setProperty("--c", `var(${h.color})`);
+    row.innerHTML = `
+      <div class="info">
+        <div class="head"><span class="swatch"></span><span class="label"></span></div>
+        <div class="meta"></div>
+        <div class="rule"></div>
+      </div>
+      <div class="big">${s.notStarted ? "–" : s.current}<small>天</small></div>`;
+    row.querySelector(".label").textContent = h.key;
+    row.querySelector(".meta").textContent = s.notStarted
+      ? `${Number(h.start.slice(5, 7))}/${Number(h.start.slice(8))}（${WEEK[dow(h.start)]}）開始算`
+      : `最長 ${s.longest} 天｜本月 ${s.monthCount} 天`;
+    row.querySelector(".rule").textContent = h.rule;
     if (s.isRecord) {
       const b = document.createElement("span");
       b.className = "badge";
       b.textContent = "新紀錄";
-      card.append(b);
+      row.querySelector(".head").append(b);
       records.push({ h, s });
     }
-    wrap.append(card);
+    wrap.append(row);
   }
 
   renderCalendar(today);
@@ -437,12 +468,12 @@ function renderCalendar(today) {
     const future = d > today;
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "day" + (future ? " future" : "") + (d === today ? " today" : "") + (d === state.selected ? " sel" : "");
+    btn.className = "day" + (future ? " future" : "") + (d === today ? " today" : "") + (d === state.selected ? " sel" : "") + (HOLIDAYS.has(d) ? " holiday" : "");
     btn.disabled = future;
     const doneNames = HABITS.filter((h) => rec && rec[h.key]).map((h) => h.key);
     btn.setAttribute("aria-label", `${fmtDay(d)}${doneNames.length ? "：" + doneNames.join("、") : "：沒有打卡"}`);
     const blocks = HABITS.map((h) => `<i class="${rec && rec[h.key] ? "on" : ""}" style="--c:var(${h.color})"></i>`).join("");
-    btn.innerHTML = `<span class="num">${Number(d.slice(8))}</span><span class="blocks" aria-hidden="true">${blocks}</span>`;
+    btn.innerHTML = `<span class="inner"><span class="num">${Number(d.slice(8))}</span><span class="blocks" aria-hidden="true">${blocks}</span></span>`;
     btn.addEventListener("click", () => { state.selected = d; renderCalendar(today); });
     grid.append(btn);
   }
@@ -467,6 +498,7 @@ function renderDetail(today) {
   }
   const items = [];
   if (rec.wake) items.push([`起床 ${rec.wake}`, true]);
+  if (rec.bed) items.push([`就寢 ${rec.bed}`, true]);
   for (const h of HABITS) items.push([`${h.key} ${rec[h.key] ? "✓" : "—"}`, rec[h.key]]);
   for (const [text, ok] of items) {
     const s = document.createElement("span");
@@ -486,7 +518,7 @@ function renderLegend() {
     lg.append(s);
   }
   const note = document.createElement("span");
-  note.textContent = "每格四塊，順序跟 Notion 的進度一樣";
+  note.textContent = "每格六塊，上排是白天、下排是晚上，順序跟 Notion 的進度一樣";
   lg.append(note);
 }
 
