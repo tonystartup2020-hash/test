@@ -36,6 +36,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -86,32 +87,64 @@ h1 {
 }
 .notice strong { display: block; margin-bottom: 2px; }
 
-/* Today pills */
+/* Today pills: tap to check in */
 .today { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 10px;
+  display: block;
+  width: 100%;
+  padding: 0;
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
   font-size: 13.5px;
   min-width: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .12s ease;
 }
+.pill .inner { display: flex; align-items: center; gap: 8px; padding: 9px 10px; min-height: 52px; }
+.pill:active:not(:disabled) { transform: scale(.96); }
+.pill:disabled { cursor: default; }
 .pill .mark {
   width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
   display: grid; place-items: center;
-  border: 2px dashed var(--line);
+  border: 2px dashed var(--muted);
   font-weight: 700; font-size: 12px;
   color: var(--surface);
 }
-.pill.done { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); }
+.pill.done { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); background: color-mix(in srgb, var(--c) 9%, var(--surface)); }
 .pill.done .mark { background: var(--c); border: 2px solid var(--c); }
-.pill.off { opacity: .5; }
+.pill.off { opacity: .45; }
+.pill.arming { border-color: var(--ink); }
+.pill.saving .mark { border-style: solid; border-color: var(--c); border-right-color: transparent; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .pill .text { display: grid; min-width: 0; }
 .pill .name { line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill .sub { font-size: 11px; color: var(--muted); line-height: 1.2; }
+.pill .sub { font-size: 11px; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sheet {
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 10px;
+}
+.sheet label { font-weight: 500; font-size: 14px; }
+.sheet .row2 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sheet input[type="time"] {
+  font: inherit; font-size: 20px; font-family: var(--font-display); font-weight: 700;
+  padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); min-width: 0;
+}
+.sheet .hint { font-size: 12.5px; color: var(--muted); }
+.btn {
+  border-radius: 999px; padding: 8px 16px; font-size: 14px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent;
+}
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
+.btn:disabled { opacity: .5; cursor: default; }
 
 /* Streak list */
 .section-title { font-size: 13px; color: var(--muted); letter-spacing: .06em; margin: 0 0 10px; }
@@ -201,12 +234,14 @@ footer p { margin: 0; }
 @keyframes rise { from { transform: translate(-50%, 16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .row.record .big, .toast { animation: none; }
+  .row.record .big, .toast, .pill.saving .mark { animation: none; }
+  .pill { transition: none; }
 }
 @media (max-width: 360px) {
   h1 { font-size: 29px; }
   .row .big { font-size: 34px; }
-  .pill { font-size: 12px; padding: 8px; gap: 6px; }
+  .pill { font-size: 12px; }
+  .pill .inner { padding: 8px; gap: 6px; }
 }
 </style>
 
@@ -227,8 +262,9 @@ footer p { margin: 0; }
   <div class="notice" id="notice" hidden></div>
 
   <section aria-labelledby="todayLabel">
-    <h2 class="section-title" id="todayLabel">今天</h2>
+    <h2 class="section-title" id="todayLabel">今天｜按一下就打卡</h2>
     <div class="today" id="todayPills"></div>
+    <div class="sheet" id="sheet" hidden></div>
   </section>
 
   <section aria-labelledby="streakLabel">
@@ -259,12 +295,12 @@ footer p { margin: 0; }
 // <logic>
 // Order follows the day, same as Notion's 進度 formula.
 const HABITS = [
-  { key: "早起", color: "--wake", rule: "06:00 前起床" },
+  { key: "早起", color: "--wake", rule: "06:00 前起床", timeField: "起床時間", timeLabel: "幾點起床？", meets: (t) => t <= "06:00" },
   { key: "晨間冥想", color: "--am", rule: "早上做" },
   { key: "健康早餐", color: "--meal", weekdayOnly: true, skipHolidays: true, rule: "只算平日，週末和國定假日不會斷" },
   { key: "運動", color: "--move", weekdayOnly: true, start: "2026-10-06", rule: "只算平日，週末不會斷" },
   { key: "睡前冥想", color: "--pm", rule: "睡前做" },
-  { key: "早睡", color: "--sleep", rule: "23:00 前就寢" },
+  { key: "早睡", color: "--sleep", rule: "23:00 前就寢", timeField: "就寢時間", timeLabel: "幾點就寢？", meets: (t) => t >= "12:00" && t <= "23:00" },
 ];
 // Weekday national holidays and make-up days off (行政院人事行政總處辦公日曆). Add 2027 once it is published.
 const HOLIDAYS = new Set(["2026-10-09", "2026-10-26", "2026-12-25"]);
@@ -298,7 +334,8 @@ function normalize(results) {
     if (String(r["標題"] || "").startsWith("【測試】")) continue;
     const d = rowDate(r["date:日期:start"]);
     if (!d) continue;
-    const day = days.get(d) || { date: d, wake: "", bed: "" };
+    const day = days.get(d) || { date: d, wake: "", bed: "", url: "" };
+    if (r.url && !day.url) day.url = r.url;
     for (const h of HABITS) day[h.key] = !!day[h.key] || isYes(r[h.key]);
     const w = String(r["起床時間"] || "").trim();
     if (w && !day.wake) day.wake = w;
@@ -391,22 +428,7 @@ function render() {
   $("#stamp").textContent = fmtStamp(state.fetchedAt);
 
   // Today pills
-  const pills = $("#todayPills");
-  pills.textContent = "";
-  for (const h of HABITS) {
-    const done = !!(day && day[h.key]);
-    const sub = !done && h.start && today < h.start ? `${Number(h.start.slice(5, 7))}/${Number(h.start.slice(8))} 起`
-      : !done && isOff(today, h) ? (HOLIDAYS.has(today) ? "假日" : "週末") : "";
-    const el = document.createElement("div");
-    el.className = "pill" + (done ? " done" : "") + (sub ? " off" : "");
-    el.style.setProperty("--c", `var(${h.color})`);
-    el.innerHTML = `<span class="mark" aria-hidden="true">${done ? "✓" : ""}</span><span class="text"><span class="name"></span><span class="sub"></span></span>`;
-    el.querySelector(".name").textContent = h.key;
-    el.querySelector(".sub").textContent = sub;
-    if (!sub) el.querySelector(".sub").remove();
-    el.setAttribute("aria-label", `${h.key}：${done ? "完成" : sub || "還沒"}`);
-    pills.append(el);
-  }
+  renderPills(today, day);
 
   // Streak rows
   const wrap = $("#streaks");
@@ -542,6 +564,7 @@ function celebrate(records) {
 }
 
 function toast(text) {
+  document.querySelectorAll(".toast").forEach((el) => el.remove());
   const t = document.createElement("div");
   t.className = "toast";
   t.setAttribute("role", "status");
@@ -672,18 +695,7 @@ async function load(fresh) {
   try {
     const mcp = await getMcp();
     if (!mcp) throw { code: "not_granted" };
-    const rows = [];
-    let cursor = null, storedAt = Date.now();
-    for (let i = 0; i < 20; i++) {
-      const { page, storedAt: at } = await queryPage(mcp, cursor, fresh);
-      if (i === 0) storedAt = at;
-      rows.push(...page.results);
-      if (!page.has_more || !page.next_cursor) break;
-      cursor = page.next_cursor;
-    }
-    state.days = normalize(rows);
-    state.fetchedAt = storedAt;
-    store(CACHE_KEY, { rows, fetchedAt: storedAt });
+    await refreshFrom(mcp, fresh);
     showNotice(null);
   } catch (err) {
     const [title, body] = explain(err);
@@ -699,6 +711,177 @@ async function load(fresh) {
     btn.textContent = "重新整理";
     render();
   }
+}
+
+async function refreshFrom(mcp, fresh) {
+  const rows = [];
+  let cursor = null, storedAt = Date.now();
+  for (let i = 0; i < 20; i++) {
+    const { page, storedAt: at } = await queryPage(mcp, cursor, fresh);
+    if (i === 0) storedAt = at;
+    rows.push(...page.results);
+    if (!page.has_more || !page.next_cursor) break;
+    cursor = page.next_cursor;
+  }
+  state.days = normalize(rows);
+  state.fetchedAt = storedAt;
+  store(CACHE_KEY, { rows, fetchedAt: storedAt });
+}
+
+// ---- Check-in: tap a habit to write it to Notion ----
+const DATA_SOURCE_ID = "4f77f49f-e13f-4bb1-98eb-6fbac8e8147f";
+const ui = { saving: null, arming: null, armTimer: null, sheetFor: null };
+
+function nowHM() { return new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16); }
+function pageIdOf(url) {
+  const m = String(url || "").match(/([0-9a-f]{32})(?:[?#]|$)/i) || String(url || "").match(/([0-9a-f-]{36})(?:[?#]|$)/i);
+  return m ? m[1] : null;
+}
+function unavailable(h, today) {
+  if (h.start && today < h.start) return `${Number(h.start.slice(5, 7))}/${Number(h.start.slice(8))} 起`;
+  if (isOff(today, h)) return HOLIDAYS.has(today) ? "假日" : "週末";
+  return "";
+}
+
+function renderPills(today, day) {
+  const pills = $("#todayPills");
+  pills.textContent = "";
+  for (const h of HABITS) {
+    const done = !!(day && day[h.key]);
+    const off = done ? "" : unavailable(h, today);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pill" + (done ? " done" : "") + (off ? " off" : "") +
+      (ui.arming === h.key ? " arming" : "") + (ui.saving === h.key ? " saving" : "");
+    btn.style.setProperty("--c", `var(${h.color})`);
+    btn.disabled = !!off || !!ui.saving;
+    let sub = off;
+    if (ui.saving === h.key) sub = "存檔中…";
+    else if (ui.arming === h.key) sub = "再按一次取消";
+    else if (h.timeField && day) sub = h.timeField === "起床時間" ? day.wake : day.bed;
+    btn.innerHTML = `<span class="inner"><span class="mark" aria-hidden="true">${done && ui.saving !== h.key ? "✓" : ""}</span><span class="text"><span class="name"></span><span class="sub"></span></span></span>`;
+    btn.querySelector(".name").textContent = h.key;
+    btn.querySelector(".sub").textContent = sub || "";
+    if (!sub) btn.querySelector(".sub").remove();
+    btn.setAttribute("aria-label", `${h.key}：${done ? "完成，按兩下取消" : off || "按一下打卡"}`);
+    btn.addEventListener("click", () => onPill(h));
+    pills.append(btn);
+  }
+}
+
+function onPill(h) {
+  if (ui.saving) return;
+  const today = butlerToday(Date.now());
+  const day = state.days.get(today);
+  const done = !!(day && day[h.key]);
+  if (h.timeField) { openSheet(h); return; }
+  if (!done) { save(h, true); return; }
+  if (ui.arming === h.key) { clearTimeout(ui.armTimer); ui.arming = null; save(h, false); return; }
+  ui.arming = h.key;
+  clearTimeout(ui.armTimer);
+  ui.armTimer = setTimeout(() => { ui.arming = null; render(); }, 4000);
+  render();
+}
+
+function openSheet(h) {
+  const today = butlerToday(Date.now());
+  const day = state.days.get(today);
+  const done = !!(day && day[h.key]);
+  const existing = day ? (h.timeField === "起床時間" ? day.wake : day.bed) : "";
+  ui.sheetFor = h.key;
+  const sh = $("#sheet");
+  sh.textContent = "";
+  sh.style.setProperty("--c", `var(${h.color})`);
+  sh.innerHTML = `
+    <label for="timeInput"></label>
+    <div class="row2">
+      <input type="time" id="timeInput" step="60">
+      <button type="button" class="btn primary" id="sheetSave">記下</button>
+      <button type="button" class="btn" id="sheetUndo" hidden>取消打勾</button>
+      <button type="button" class="btn" id="sheetClose">關閉</button>
+    </div>
+    <div class="hint"></div>`;
+  sh.querySelector("label").textContent = `${h.key}｜${h.timeLabel}`;
+  sh.querySelector(".hint").textContent = h.key === "早起"
+    ? "06:00 前起床就算早起；晚一點起來也會記下時間。"
+    : "23:00 前就寢就算早睡；凌晨 4 點前睡的會記在前一天。";
+  const input = sh.querySelector("#timeInput");
+  input.value = /^\d{1,2}:\d{2}$/.test(existing) ? existing.padStart(5, "0") : nowHM();
+  const undo = sh.querySelector("#sheetUndo");
+  undo.hidden = !done;
+  sh.querySelector("#sheetSave").addEventListener("click", () => {
+    const t = input.value;
+    if (!/^\d{2}:\d{2}$/.test(t)) { input.focus(); return; }
+    closeSheet();
+    save(h, h.meets(t), t);
+  });
+  undo.addEventListener("click", () => { closeSheet(); save(h, false); });
+  sh.querySelector("#sheetClose").addEventListener("click", closeSheet);
+  sh.hidden = false;
+  input.focus();
+}
+function closeSheet() { ui.sheetFor = null; $("#sheet").hidden = true; }
+
+const AMBIGUOUS = ["server_unavailable", "upstream_error", "cancelled", "rate_limited"];
+
+async function save(h, value, timeText) {
+  const date = butlerToday(Date.now());
+  ui.saving = h.key;
+  render();
+  let mcp = null, stage = "read";
+  try {
+    mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    // Read fresh first so a record made elsewhere (the butler) is updated, never duplicated.
+    await refreshFrom(mcp, true);
+    const rec = state.days.get(date);
+    const props = { [h.key]: value ? "__YES__" : "__NO__" };
+    if (h.timeField && timeText) props[h.timeField] = timeText;
+    const id = rec && pageIdOf(rec.url);
+    stage = "write";
+    if (id) {
+      await mcp.callTool("Notion", "notion-update-page",
+        { page_id: id, command: "update_properties", properties: props, allow_async: false }, { cache: false });
+    } else {
+      await mcp.callTool("Notion", "notion-create-pages", {
+        parent: { type: "data_source_id", data_source_id: DATA_SOURCE_ID },
+        pages: [{ properties: { "標題": fmtDay(date), "date:日期:start": date, "date:日期:is_datetime": 0, ...props } }],
+        allow_async: false,
+      }, { cache: false });
+    }
+    stage = "reread";
+    await mcp.invalidate("Notion").catch(() => {});
+    await refreshFrom(mcp, true);
+    showNotice(null);
+    ui.saving = null;
+    reportSaved(h, value, timeText, date);
+  } catch (err) {
+    ui.saving = null;
+    if (stage === "reread") {
+      showNotice("已存進 Notion", "只是重新讀取失敗，按重新整理就會看到。");
+    } else if (stage === "write" && AMBIGUOUS.includes(err && err.code)) {
+      showNotice("不確定有沒有存到", "Notion 沒有回應，我重新讀一次。畫面上沒打勾的話，再按一次就好。");
+      if (mcp) await refreshFrom(mcp, true).catch(() => {});
+    } else {
+      const [title, body] = explain(err);
+      showNotice(`沒存到：${title}`, body);
+    }
+  } finally {
+    ui.saving = null;
+    render();
+  }
+}
+
+function reportSaved(h, value, timeText, date) {
+  if (!value) {
+    if (timeText) toast(h.key === "早起" ? `記下了，${timeText} 起床` : `記下了，${timeText} 睡`);
+    else toast(`已取消${h.key}的打勾`);
+    return;
+  }
+  const s = habitStats(state.days, h, date);
+  const time = timeText ? `（${timeText}）` : "";
+  if (s.current === 1 && s.prevBest > 0) toast(`✅ ${h.key}${time} 連續第 1 天，接回來了 💪`);
+  else toast(`✅ ${h.key}${time} 連續第 ${s.current} 天｜本月 ${s.monthCount} 天`);
 }
 
 // Boot: show the last copy right away, then fetch.
