@@ -349,6 +349,21 @@ body { padding-block: 20px 108px; }
 .ag-item .tag { font-size: 11.5px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
 .ag-none { color: var(--muted); font-size: 13.5px; }
 .cal .detail .ag-item { margin-top: 5px; }
+/* Tap a 行程 to change its time or wording */
+button.ag-item { font: inherit; color: inherit; text-align: left; border: 0; background: transparent; padding: 4px 6px; margin-inline: -6px; width: calc(100% + 12px); border-radius: 8px; cursor: pointer; }
+button.ag-item:hover { background: var(--bg); }
+button.ag-item[aria-expanded="true"] { background: var(--bg); }
+button.ag-item .n::after { content: "›"; color: var(--muted); margin-left: 6px; }
+.ag-hint { font-size: 12px; color: var(--muted); }
+.ed { border: 1.5px solid var(--ink); border-radius: 14px; padding: 12px; display: grid; gap: 12px; margin: 4px 0 8px; background: var(--surface); min-width: 0; }
+.ed input[type="text"], .ed textarea { font: inherit; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.ed textarea { min-height: 64px; resize: vertical; }
+.ed input[type="date"], .ed input[type="datetime-local"] {
+  font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); min-width: 0; max-width: 100%; justify-self: start;
+}
+.ed label.check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.ed .wf-err { font-size: 13.5px; }
 /* ---- 健康 ---- */
 .hl-card { background: var(--surface); border-radius: 18px; padding: 14px 16px; display: grid; gap: 16px; min-width: 0; }
 .hl-sec { display: grid; gap: 0; min-width: 0; }
@@ -539,9 +554,9 @@ body { padding-block: 20px 108px; }
   <section class="agenda" id="clAgenda" aria-label="接下來 7 天" hidden></section>
 
   <footer>
-    <p>工作直接讀寫 Notion「📪收件匣」。有排進 Google 日曆的行程，這裡只能按完成；改時間或取消，跟管家說一聲。</p>
+    <p>工作直接讀寫 Notion「📪收件匣」。有排進 Google 日曆的行程，上面只能按完成；要改時間或內容，點下面月曆上的那個行程；要取消，跟管家說一聲。</p>
     <p>按完成之後，可以順手記這件事花了多少錢（存進「💸 收支紀錄」），或記下接著要做的事（例如拿去縫 → 明天領衣服）。都不用的話按「不用了」。</p>
-    <p>月曆的行程來自 Google 日曆（我的＋家庭），到期事項來自 Notion。月曆只能看；要新增或改行程，跟管家說一聲。</p>
+    <p>月曆的行程來自 Google 日曆（我的＋家庭），到期事項來自 Notion。點一個行程就能改時間、標題、地點和說明，Google 日曆和 Notion 會一起改；重複的行程只改那一次。家庭日曆的行程只能看。要新增或取消行程，跟管家說一聲。</p>
   </footer>
 </main>
 
@@ -1365,6 +1380,7 @@ function normalizeTask(r) {
     due: taipeiDate(r["date:截止日期:start"]), dueTime: taipeiHM(r["date:截止日期:start"]),
     startDate: taipeiDate(r["date:開始/結束時間:start"]),
     startTime: taipeiHM(r["date:開始/結束時間:start"]), endTime: taipeiHM(r["date:開始/結束時間:end"]),
+    endDate: taipeiDate(r["date:開始/結束時間:end"]),
     next: String(r["下一步行動"] || "").trim(),
     contexts: parseList(r["情境"]),
     projects: parseList(r["所屬專案"]),
@@ -1409,18 +1425,27 @@ function classifyTasks(tasks, today) {
 function normalizeEvent(ev, cal) {
   if (!ev || !ev.start) return null;
   const title = String(ev.summary || "").trim() || "（沒有標題）";
-  const base = { id: String(ev.id || ""), title, cal, cancelled: ev.status === "cancelled", fixed: isFixedReminder(title) };
+  const base = { id: String(ev.id || ""), title, cal, cancelled: ev.status === "cancelled", fixed: isFixedReminder(title),
+    summary: String(ev.summary || ""), location: String(ev.location || ""), description: String(ev.description || ""),
+    recurring: !!ev.recurringEventId };
   if (ev.start.date) {
     // Google's all-day end date is exclusive.
     let endDate = ev.end && ev.end.date ? addDays(ev.end.date, -1) : ev.start.date;
     if (endDate < ev.start.date) endDate = ev.start.date;
-    return { ...base, allDay: true, date: ev.start.date, endDate, start: "", end: "" };
+    return { ...base, allDay: true, date: ev.start.date, endDate, start: "", end: "", startLocal: ev.start.date, endLocal: endDate };
   }
   if (ev.start.dateTime) {
     const date = taipeiDate(ev.start.dateTime);
-    return { ...base, allDay: false, date, endDate: date, start: taipeiHM(ev.start.dateTime), end: taipeiHM(ev.end && ev.end.dateTime) };
+    const startLocal = taipeiLocal(ev.start.dateTime);
+    const endLocal = taipeiLocal(ev.end && ev.end.dateTime) || localPlus(startLocal, 60);
+    return { ...base, allDay: false, date, endDate: date, start: taipeiHM(ev.start.dateTime), end: taipeiHM(ev.end && ev.end.dateTime), startLocal, endLocal };
   }
   return null;
+}
+// "2026-10-05T16:00" in Taipei time, from any ISO datetime.
+function taipeiLocal(raw) {
+  const ms = Date.parse(raw || "");
+  return isNaN(ms) ? "" : new Date(ms + 8 * 3600e3).toISOString().slice(0, 16);
 }
 // "19:15-21:15" when the end is known, otherwise just the start.
 function timeLabel(e) {
@@ -1433,8 +1458,12 @@ function sortAgenda(a, b) {
   return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
 }
 function taskAsEvent(t) {
+  const allDay = !t.startTime;
+  const endDay = t.endDate && t.endDate >= t.startDate ? t.endDate : t.startDate;
+  const startLocal = allDay ? t.startDate : `${t.startDate}T${t.startTime}`;
+  const endLocal = allDay ? endDay : t.endTime ? `${endDay}T${t.endTime}` : localPlus(startLocal, 60);
   return { id: "task:" + t.id, title: t.title, cal: "Notion", cancelled: false, fixed: false,
-    allDay: !t.startTime, date: t.startDate, endDate: t.startDate, start: t.startTime, end: t.endTime, task: t };
+    allDay, date: t.startDate, endDate: t.startDate, start: t.startTime, end: t.endTime, task: t, startLocal, endLocal };
 }
 // Everything on one day: Google events, plus Notion schedule rows that have no matching Google event, plus what falls due.
 function dayAgenda(date, events, tasks) {
@@ -1577,6 +1606,101 @@ function sameExpense(r, props) {
   return r["原始內容"] === props["原始內容"] && Number(r["金額"]) === props["金額"] && taipeiDate(r["date:日期:start"]) === props["date:日期:start"];
 }
 function sameTask(r, props) { return r["任務名稱"] === props["任務名稱"] && r["原始輸入"] === props["原始輸入"]; }
+
+// ---- 改行程: tap a 行程 on the 月曆, change its time or wording. Google 日曆 and its Notion row change together (守則 第 5 章③). ----
+// A draft is { title, allDay, start, end, location, description }; start/end are "YYYY-MM-DDTHH:MM" (Taipei), or dates (end inclusive) when allDay.
+function editDraft(e) {
+  return {
+    title: e.cal === "Notion" ? e.title : e.summary, allDay: e.allDay, start: e.startLocal, end: e.endLocal,
+    location: e.location || "", description: e.description || "",
+  };
+}
+function draftAllDay(d, on) {
+  if (on === d.allDay) return d;
+  if (on) return { ...d, allDay: true, start: d.start.slice(0, 10), end: (d.end || d.start).slice(0, 10) };
+  const start = `${d.start.slice(0, 10)}T09:00`;
+  return { ...d, allDay: false, start, end: localPlus(start, 60) };
+}
+// Moving the start keeps the length; `from` is the start it was moved from.
+function draftMoveStart(d, from, start) {
+  if (d.allDay) {
+    if (!validDate(start) || !validDate(from) || !validDate(d.end)) return { ...d, start };
+    return { ...d, start, end: addDays(start, Math.max(0, daysBetween(from, d.end))) };
+  }
+  if (!validLocal(start) || !validLocal(from) || !validLocal(d.end)) return { ...d, start };
+  const mins = Math.max(0, Math.round((Date.parse(d.end + ":00Z") - Date.parse(from + ":00Z")) / 60000));
+  return { ...d, start, end: localPlus(start, mins) };
+}
+// The form as typed -> a draft that is safe to write, or { err } with a sentence for Tony.
+function checkDraft(d) {
+  const title = String(d.title || "").trim().slice(0, 200);
+  if (!title) return { err: "標題不能是空的" };
+  const out = { title, allDay: !!d.allDay, location: String(d.location || "").trim().slice(0, 300), description: String(d.description || "").slice(0, 4000) };
+  if (out.allDay) {
+    if (!validDate(d.start)) return { err: "選一個開始的日期" };
+    const end = validDate(d.end) ? d.end : d.start;
+    if (end < d.start) return { err: "結束日期不能早於開始日期" };
+    return { ok: { ...out, start: d.start, end } };
+  }
+  if (!validLocal(d.start)) return { err: "開始要填日期和時間" };
+  if (!validLocal(d.end)) return { err: "結束要填日期和時間" };
+  if (d.end <= d.start) return { err: "結束要比開始晚" };
+  return { ok: { ...out, start: d.start, end: d.end } };
+}
+function timeChanged(base, d) { return d.allDay !== base.allDay || d.start !== base.start || d.end !== base.end; }
+// Only what changed goes to Google. No invitations or emails (守則 第 8 章).
+function calendarPatch(base, d) {
+  const p = {};
+  if (d.title !== base.title) p.summary = d.title;
+  if (d.location !== base.location.trim()) p.location = d.location;
+  if (d.description.trim() !== base.description.trim()) p.description = d.description;
+  if (timeChanged(base, d)) {
+    if (d.allDay) { p.allDay = true; p.startTime = d.start; p.endTime = addDays(d.end, 1); }
+    else {
+      if (base.allDay) p.allDay = false;
+      p.startTime = d.start + ":00+08:00";
+      p.endTime = d.end + ":00+08:00";
+      p.timeZone = "Asia/Taipei";
+    }
+  }
+  return p;
+}
+// The Notion row only carries the name and the time.
+function schedulePatch(base, d) {
+  const p = {};
+  if (d.title !== base.title) p["任務名稱"] = d.title;
+  if (timeChanged(base, d)) {
+    if (d.allDay) {
+      p["date:開始/結束時間:start"] = d.start;
+      p["date:開始/結束時間:end"] = d.end > d.start ? d.end : null;
+      p["date:開始/結束時間:is_datetime"] = 0;
+    } else {
+      p["date:開始/結束時間:start"] = d.start + ":00+08:00";
+      p["date:開始/結束時間:end"] = d.end + ":00+08:00";
+      p["date:開始/結束時間:is_datetime"] = 1;
+    }
+  }
+  return p;
+}
+// Notion names usually leave out the emoji the calendar title starts with ("Momo 打疫苗" vs "🐶 Momo 打疫苗"): keep it that way.
+function notionName(oldCal, oldNotion, newCal) {
+  if (!oldNotion || oldNotion === oldCal || !oldCal.endsWith(oldNotion)) return newCal;
+  const prefix = oldCal.slice(0, oldCal.length - oldNotion.length);
+  return newCal.startsWith(prefix) && newCal.length > prefix.length ? newCal.slice(prefix.length) : newCal;
+}
+// Did the calendar end up with what was asked? Time and title only: Google may reformat a description.
+function eventMatches(e, d) {
+  return !!e && e.allDay === d.allDay && e.startLocal === d.start && e.endLocal === d.end && e.summary === d.title;
+}
+function sameEvent(a, b) {
+  return a.summary === b.summary && a.allDay === b.allDay && a.startLocal === b.startLocal && a.endLocal === b.endLocal &&
+    a.location === b.location && a.description === b.description;
+}
+function whenLabel(d) {
+  if (d.allDay) return d.end > d.start ? `${fmtDay(d.start)}–${fmtDay(d.end)} 整天` : `${fmtDay(d.start)} 整天`;
+  const sd = d.start.slice(0, 10), endDay = d.end.slice(0, 10);
+  return `${fmtDay(sd)} ${d.start.slice(11)}–${endDay === sd ? "" : fmtDay(endDay) + " "}${d.end.slice(11)}`;
+}
 // </logic>
 
 // ---- Shared helpers for the new tabs ----
@@ -1791,7 +1915,7 @@ function taskRow(t, today, showType) {
   if (showType && t.type) meta.append(h("span", "", t.type));
   if (t.postponed > 0) meta.append(h("span", "", `延後過 ${t.postponed} 次`));
   if (t.contexts.length) meta.append(h("span", "", t.contexts.join(" ")));
-  if (t.calId) meta.append(h("span", "", "改時間或取消請跟管家說"));
+  if (t.calId) meta.append(h("span", "", "改時間：點下面月曆上的行程｜取消請跟管家說"));
   if (meta.childNodes.length) el.append(meta);
   el.append(taskActions(t, today));
   return el;
@@ -2424,7 +2548,7 @@ async function afSave() {
   }
 }
 
-// ---- 月曆 (read-only) ----
+// ---- 月曆 ----
 const cl = { month: null, selected: null, view: "month", months: new Map(), loading: false, lastAt: null };
 
 function clEvents() {
@@ -2480,12 +2604,18 @@ function clOpen() {
 function agendaNodes(date, ag) {
   const nodes = [];
   for (const e of ag.events) {
-    const item = h("div", "ag-item" + (e.fixed ? " fixed" : ""));
+    const open = edIsOpen(e, date);
+    const item = h("button", "ag-item" + (e.fixed ? " fixed" : ""));
+    item.type = "button";
+    item.setAttribute("aria-expanded", String(open));
+    item.setAttribute("aria-label", `${timeLabel(e)} ${e.title}：${e.cal === "家庭" ? "家庭日曆，只能看" : "點一下改時間或內容"}`);
     const n = h("span", "n", e.title);
     if (e.cal === "家庭") n.append(h("span", "tag", "家庭"));
     if (e.cal === "Notion") n.append(h("span", "tag", "只在 Notion"));
     item.append(h("span", "t", timeLabel(e)), n);
+    item.addEventListener("click", () => edToggle(e, date));
     nodes.push(item);
+    if (open) nodes.push(editorCard());
   }
   for (const t of ag.dues) {
     const item = h("div", "ag-item due");
@@ -2496,7 +2626,20 @@ function agendaNodes(date, ag) {
   return nodes;
 }
 
+// Re-rendering rebuilds the form: keep what was typed and where the cursor was.
 function renderCal() {
+  edSync();
+  const a = document.activeElement;
+  const keep = a && a.id && a.id.startsWith("ed") ? { id: a.id, sel: typeof a.selectionStart === "number" ? [a.selectionStart, a.selectionEnd] : null } : null;
+  renderCalBody();
+  if (!keep) return;
+  const el = document.getElementById(keep.id);
+  if (!el || document.activeElement === el) return;
+  el.focus({ preventScroll: true });
+  if (keep.sel && el.setSelectionRange) { try { el.setSelectionRange(keep.sel[0], keep.sel[1]); } catch (e) {} }
+}
+
+function renderCalBody() {
   if (!cl.month) return;
   const today = taipeiToday(Date.now());
   const events = clEvents();
@@ -2547,7 +2690,7 @@ function renderCal() {
     if (ag.dues.length) dots.append(h("i", "due"));
     inner.append(dots);
     btn.append(inner);
-    btn.addEventListener("click", () => { cl.selected = day; renderCal(); });
+    btn.addEventListener("click", () => { if (cl.selected !== day && !ed.saving) edReset(); cl.selected = day; renderCal(); });
     grid.append(btn);
   }
 
@@ -2556,7 +2699,216 @@ function renderCal() {
   const sel = cl.selected && cl.selected.startsWith(cl.month) ? cl.selected : null;
   if (!sel) { detail.append(h("div", "ag-none", "點一天看當天的行程")); return; }
   detail.append(h("div", "ag-date" + (HOLIDAYS.has(sel) ? " holiday" : ""), sel === today ? `${fmtDay(sel)}・今天` : fmtDay(sel)));
-  detail.append(...agendaNodes(sel, dayAgenda(sel, events, tk.tasks)));
+  const selAg = dayAgenda(sel, events, tk.tasks);
+  detail.append(...agendaNodes(sel, selAg));
+  if (!ed.key && selAg.events.some((e) => e.cal !== "家庭")) detail.append(h("div", "ag-hint", "點行程可以改時間和內容"));
+}
+
+// ---- 改行程 ----
+const ed = { key: null, day: null, item: null, d: null, anchor: null, saving: false, err: "", note: "" };
+function edKey(e) { return `${e.cal}|${e.id}`; }
+function edIsOpen(e, day) { return ed.key === edKey(e) && ed.day === day; }
+function edReset() { Object.assign(ed, { key: null, day: null, item: null, d: null, anchor: null, saving: false, err: "", note: "" }); }
+function edToggle(e, day) {
+  if (ed.saving) return;
+  if (edIsOpen(e, day)) edReset();
+  else {
+    edReset();
+    const d = e.cal === "家庭" ? null : editDraft(e);
+    Object.assign(ed, { key: edKey(e), day, item: e, d, anchor: d && d.start });
+  }
+  renderCal();
+  const t = document.getElementById("edTitle");
+  if (t) t.focus({ preventScroll: true });
+}
+// The start field is kept in step by its own listener (moving it moves the end); the rest is read here.
+function edSync() {
+  if (!ed.d || ed.saving) return;
+  for (const [id, key] of [["edTitle", "title"], ["edEnd", "end"], ["edLocation", "location"], ["edDesc", "description"]]) {
+    const el = document.getElementById(id);
+    if (el) ed.d[key] = key === "end" ? el.value.slice(0, ed.d.allDay ? 10 : 16) : el.value;
+  }
+}
+function edInput(type, id, value, label) {
+  const i = h(type === "textarea" ? "textarea" : "input");
+  if (type !== "textarea") i.type = type;
+  i.id = id;
+  i.value = value || "";
+  i.disabled = ed.saving;
+  if (type === "datetime-local") i.step = "60";
+  if (label) i.setAttribute("aria-label", label);
+  return i;
+}
+
+function editorCard() {
+  const box = h("div", "ed");
+  const e = ed.item;
+  const close = h("button", "btn", ed.d ? "取消" : "關閉");
+  close.type = "button";
+  close.disabled = ed.saving;
+  close.addEventListener("click", () => { if (!ed.saving) { edReset(); renderCal(); } });
+  if (!ed.d) {
+    box.append(h("p", "qa-note", "這是家庭日曆的行程，這裡只能看。要改的話，到 Google 日曆改。"));
+    const row = h("div", "tk-acts");
+    row.append(close);
+    box.append(row);
+    return box;
+  }
+  const d = ed.d;
+  const title = edInput("text", "edTitle", d.title, "標題");
+  title.maxLength = 200;
+  box.append(qaField("標題", title));
+
+  const all = h("label", "check");
+  const cb = h("input");
+  cb.type = "checkbox";
+  cb.id = "edAllDay";
+  cb.checked = d.allDay;
+  cb.disabled = ed.saving;
+  cb.addEventListener("change", () => { edSync(); ed.d = draftAllDay(ed.d, cb.checked); ed.anchor = ed.d.start; ed.err = ""; renderCal(); });
+  all.append(cb, "整天");
+  box.append(all);
+
+  const type = d.allDay ? "date" : "datetime-local";
+  const start = edInput(type, "edStart", d.start, "開始");
+  const end = edInput(type, "edEnd", d.end, "結束");
+  start.addEventListener("input", () => {
+    edSync();
+    const v = start.value.slice(0, d.allDay ? 10 : 16);
+    ed.d = draftMoveStart(ed.d, ed.anchor, v);
+    if (ed.d.allDay ? validDate(v) : validLocal(v)) ed.anchor = v;
+    end.value = ed.d.end;
+  });
+  box.append(qaField(d.allDay ? "開始日期" : "開始", start), qaField(d.allDay ? "結束日期" : "結束（改開始時，結束會跟著移，長度不變）", end));
+
+  if (e.cal === "我的") {
+    const loc = edInput("text", "edLocation", d.location, "地點（可以不填）");
+    loc.maxLength = 300;
+    box.append(qaField("地點（可以不填）", loc));
+    box.append(qaField("說明（可以不填）", edInput("textarea", "edDesc", d.description, "說明（可以不填）")));
+  }
+
+  const notes = [];
+  if (e.recurring) notes.push("這是重複的行程，只會改這一次。");
+  if (e.cal === "Notion") notes.push("這筆只在 Notion，日曆還沒有；改好後管家會照新的時間補進日曆。");
+  else if (tk.tasks.some((t) => t.calId && t.calId === e.id)) notes.push("Notion 裡對應的那一筆會一起改。");
+  if (notes.length) box.append(h("p", "qa-note", notes.join("")));
+  if (ed.note) box.append(h("p", "qa-note", ed.note));
+  if (ed.err) { const p = h("p", "wf-err", ed.err); p.setAttribute("role", "alert"); box.append(p); }
+
+  const row = h("div", "tk-acts");
+  const save = h("button", "btn primary", ed.saving ? "存檔中…" : "儲存");
+  save.type = "button";
+  save.disabled = ed.saving;
+  save.addEventListener("click", edSave);
+  row.append(save, close);
+  box.append(row);
+  return box;
+}
+
+// Read the event back from Google (fresh) around where it should now be.
+async function edReadBack(mcp, id, d) {
+  const res = await readEvents(mcp, `${d.start.slice(0, 10)}T00:00:00+08:00`, `${addDays(d.end.slice(0, 10), 2)}T00:00:00+08:00`, true);
+  return res.events.find((x) => x.cal === "我的" && x.id === id) || null;
+}
+
+async function edSave() {
+  if (ed.saving || !ed.d || !ed.item) return;
+  edSync();
+  const c = checkDraft(ed.d);
+  if (c.err) { ed.err = c.err; renderCal(); return; }
+  const d = c.ok, e = ed.item, isGoogle = e.cal === "我的";
+  Object.assign(ed, { saving: true, err: "", note: "" });
+  renderCal();
+  let mcp = null, stage = "read", calSaved = false, done = false;
+  try {
+    mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    // Read fresh first, so a change the butler made elsewhere is never overwritten blindly.
+    await tkRefresh(mcp, true, true);
+    let cur = e, task;
+    if (isGoogle) {
+      const res = await readEvents(mcp, `${e.date}T00:00:00+08:00`, `${addDays(e.endDate, 1)}T00:00:00+08:00`, true);
+      cur = res.events.find((x) => x.cal === "我的" && x.id === e.id);
+      if (!cur) { ed.err = "日曆上找不到這個行程了，可能剛被改期或取消。按右上角的重新整理看看。"; return; }
+      if (!sameEvent(cur, e)) {
+        ed.item = cur;
+        ed.err = "這個行程剛剛在別的地方被改過。你填的還在格子裡，確認沒問題再按一次儲存。";
+        return;
+      }
+      task = tk.tasks.find((t) => t.calId && t.calId === e.id) || null;
+    } else {
+      task = tk.tasks.find((t) => t.id === e.task.id) || null;
+      if (!task) { ed.err = "這筆已經不在未完成清單了，可能已經完成或取消。"; return; }
+      cur = taskAsEvent(task);
+    }
+    const base = editDraft(cur);
+    const calP = isGoogle ? calendarPatch(base, d) : {};
+    const notionP = task ? schedulePatch(base, d) : {};
+    if (isGoogle && notionP["任務名稱"]) notionP["任務名稱"] = notionName(base.title, task.title, d.title);
+    if (!Object.keys(calP).length && !Object.keys(notionP).length) { done = true; toast("沒有改到任何東西"); return; }
+
+    if (Object.keys(calP).length) {
+      stage = "calendar";
+      const send = (patch) => mcp.callTool("Google Calendar", "update_event",
+        { eventId: e.id, calendarId: "primary", notificationLevel: "NONE", ...patch }, { cache: false });
+      let unclear = false;
+      try { await send(calP); } catch (err) { if (!TK_AMBIGUOUS.includes(err && err.code)) throw err; unclear = true; }
+      await mcp.invalidate("Google Calendar").catch(() => {});
+      stage = "verify";
+      let after = await edReadBack(mcp, e.id, d);
+      // An all-day end can come back one day long if the end was read as inclusive: fix it once.
+      if (!unclear && after && d.allDay && after.allDay && after.startLocal === d.start && after.endLocal === addDays(d.end, 1)) {
+        await send({ allDay: true, startTime: d.start, endTime: d.end });
+        await mcp.invalidate("Google Calendar").catch(() => {});
+        after = await edReadBack(mcp, e.id, d);
+      }
+      if (!eventMatches(after, d)) {
+        if (unclear) { ed.err = "Google 日曆沒有回應，讀回來也還是舊的，應該沒改到。再按一次儲存就好。"; return; }
+        ed.err = after
+          ? `日曆上現在是「${after.summary}｜${whenLabel(editDraft(after))}」，跟你填的不一樣。請到 Google 日曆確認一下。`
+          : "日曆說改好了，但讀回來找不到這個行程。按右上角的重新整理看看。";
+        return;
+      }
+      calSaved = true;
+    }
+
+    if (Object.keys(notionP).length) {
+      stage = "notion";
+      await mcp.callTool("Notion", "notion-update-page",
+        { page_id: task.id, command: "update_properties", properties: notionP, allow_async: false }, { cache: false });
+      await mcp.invalidate("Notion").catch(() => {});
+    }
+    done = true;
+    toast(`已改：${d.title}｜${whenLabel(d)}`);
+  } catch (err) {
+    if (stage === "verify") ed.err = "日曆應該改好了，只是讀回來失敗。按右上角的重新整理確認一下。";
+    else if (stage === "notion") {
+      const [t, body] = explain(err);
+      const lead = calSaved ? "Google 日曆改好了，但 Notion 那一筆" : "Notion";
+      ed.err = TK_AMBIGUOUS.includes(err && err.code)
+        ? `${lead}不確定有沒有改到。按右上角的重新整理看看，沒改到就跟管家說一聲。`
+        : `${lead}沒改到：${t}。${body}${calSaved ? "跟管家說一聲，請他把 Notion 那筆一起改。" : ""}`;
+    } else {
+      const [t, body] = stage === "calendar" ? explainFor(err, "Google 日曆") : explain(err);
+      ed.err = `沒改到：${t}。${body}`;
+    }
+  } finally {
+    ed.saving = false;
+    if (done) {
+      // Follow the 行程 to its new day.
+      edReset();
+      cl.selected = d.start.slice(0, 10);
+      if (cl.view === "month") cl.month = cl.selected.slice(0, 7);
+    }
+    renderCal();
+    if (mcp && (calSaved || done)) {
+      cl.months.clear();
+      await tkRefresh(mcp, true).catch(() => {});
+      renderTasks();
+      await clLoad(true);
+    }
+  }
 }
 
 function clShift(n) {
