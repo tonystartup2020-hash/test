@@ -577,6 +577,7 @@ body { padding-block: 20px 108px; }
           <button type="button" class="chip" id="hlW500" data-water="500">＋500</button>
           <button type="button" class="chip" id="hlW600" data-water="600">＋600</button>
           <button type="button" class="chip" id="hlW1000" data-water="1000">＋1000</button>
+          <button type="button" class="chip" id="hlFin">🥤 FIN 580</button>
           <input type="number" class="hl-in" id="hlWaterInput" inputmode="numeric" min="1" max="5000" step="50" placeholder="cc" aria-label="自己輸入喝了幾 cc">
           <button type="button" class="chip" id="hlWaterAdd">加</button>
           <button type="button" class="chip" id="hlWaterUndo">減回去</button>
@@ -643,7 +644,7 @@ body { padding-block: 20px 108px; }
 
   <footer>
     <p>飲食請在對話裡拍照或打字跟管家說，記完回來按重新整理。照片裡有收據或價格的話，管家會一起記進「💸 收支紀錄」。</p>
-    <p>運動消耗不會加回可以吃的量。日常走路不用記，專程去走才記。喝水只算水。</p>
+    <p>運動消耗不會加回可以吃的量。日常走路不用記，專程去走才記。喝水算水和運動飲料；按「🥤 FIN 580」會同時加 580 cc 水分，並把熱量記進飲食紀錄。</p>
   </footer>
 </main>
 
@@ -2616,6 +2617,9 @@ const BODY_PARTS = ["胸", "背", "肩", "手臂", "腿", "臀", "核心", "有�
 const WORKOUT_DEFAULT_MIN = { "排球課": 120, "排球（朋友）": 120, "走路": 30 };
 const GYM_DEFAULT = { lift: 60, cardio: 30 };
 const WEB_SOURCE = "網頁快速記";
+// One bottle of sports drink: its water counts toward 喝水, its calories go into 🍽️ 飲食紀錄 (守則 第 12 章「喝水」).
+// 黑松 FIN 補給飲料 580 ml label: 每瓶約 100 大卡、蛋白質 0、碳水 25.8 g、鈉 220 mg.
+const SPORTS_DRINK = { short: "FIN", name: "FIN 補給飲料", cc: 580, kcal: 100, protein: 0, detail: "黑松 FIN 補給飲料 1 瓶 580 ml（碳水 25.8 g、鈉 220 mg）" };
 // Where a date-only meal sorts among the day's meals.
 const MEAL_CLOCK = { "早餐": "07:00", "午餐": "12:00", "點心": "15:00", "飲料": "15:00", "晚餐": "18:30", "宵夜": "23:00" };
 
@@ -2811,6 +2815,16 @@ function workoutProps(e, ms) {
   if (e.learned) p["學到什麼／下次改進"] = e.learned;
   return p;
 }
+function drinkMealProps(d, ms) {
+  return {
+    "標題": `飲料｜${d.name} ${d.cc}ml`, "date:日期:start": nowTaipeiISO(ms), "date:日期:is_datetime": 1,
+    "餐別": "飲料", "內容": d.detail, "估計熱量": d.kcal, "估計蛋白質": d.protein, "來源": "文字", "原始輸入": WEB_SOURCE,
+  };
+}
+function findWebMeal(rows, props) {
+  const at = Date.parse(props["date:日期:start"]);
+  return rows.find((r) => r["原始輸入"] === WEB_SOURCE && r["標題"] === props["標題"] && Date.parse(r["date:日期:start"]) === at) || null;
+}
 function savedLine(e) { return `已記：${e.title} ${e.minutes} 分鐘，約 ${fmtNum(e.kcal)} 大卡`; }
 // After an unclear write: is the row we sent already in Notion?
 function findWebWorkout(rows, props) {
@@ -2826,7 +2840,7 @@ const HL_VIEWS = {
   body: "view://3ea49a21-5d5f-8175-a016-000c1d0d50fa",
   habits: VIEW_URL,
 };
-const HL_DS = { workouts: "4fe51ae5-8ad6-4a84-b915-288f5999ba9a", body: "814f4577-c34f-433b-80cd-9a50dcdff083", habits: DATA_SOURCE_ID };
+const HL_DS = { meals: "b34fdbbb-7118-49ea-9990-e76e1df1d2ae", workouts: "4fe51ae5-8ad6-4a84-b915-288f5999ba9a", body: "814f4577-c34f-433b-80cd-9a50dcdff083", habits: DATA_SOURCE_ID };
 const HL_CACHE = "health-cache-v1";
 const HL_DROP = ["needs_reauth", "server_not_connected", "blocked_by_policy", "approval_required", "not_in_manifest"];
 const hl = {
@@ -2959,38 +2973,85 @@ function renderWaterControls(today) {
   if (hl.waterUndo.day !== today) hl.waterUndo = { day: today, amounts: [] };
   const off = !hl.live;
   document.querySelectorAll("#tab-health [data-water]").forEach((b) => { b.disabled = off; });
+  $("#hlFin").disabled = off;
   $("#hlWaterAdd").disabled = off;
   $("#hlWaterInput").disabled = off;
   const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
   const undo = $("#hlWaterUndo");
   undo.disabled = off || !last;
-  undo.textContent = last ? `減回去 ${fmtNum(last)}` : "減回去";
+  undo.textContent = last ? `減回去 ${last.drink ? last.drink.short : fmtNum(last.cc)}` : "減回去";
   $("#hlWaterStatus").textContent = hl.waterPending ? `存檔中…${hl.waterPending > 1 ? `（還有 ${hl.waterPending - 1} 筆排隊）` : ""}` : "";
 }
 
 // ---- 喝水: presses queue up; each one re-reads, writes, re-reads. ----
-function hlWater(delta) {
+// The undo stack holds { cc, drink, mealId }: undoing a sports drink takes back its water and its 飲食 row.
+function hlWater(delta, drink) {
   if (!hl.live || !delta) return;
   const isUndo = delta < 0;
-  if (isUndo) hl.waterUndo.amounts.pop();
+  const entry = isUndo ? hl.waterUndo.amounts.pop() : null;
   hl.waterPending++;
   renderWaterControls(butlerToday(Date.now()));
   hl.waterChain = hl.waterChain
-    .then(() => hlWaterWrite(delta, isUndo))
+    .then(() => hlWaterWrite(delta, isUndo, isUndo ? entry && entry.drink : drink, entry))
     .catch(() => {})
     .finally(() => { hl.waterPending--; renderHealth(); });
 }
+function hlUndoWater() {
+  const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
+  if (last) hlWater(-last.cc);
+}
 
-async function hlWaterWrite(delta, isUndo) {
+// The water is saved first; then a sports drink's 飲食 row is added (or, on undo, marked 測試資料 so it stops counting).
+async function hlDrinkMeal(mcp, drink, isUndo, entry) {
+  try {
+    if (isUndo) {
+      if (!entry || !entry.mealId) return { ok: true };
+      await mcp.callTool("Notion", "notion-update-page",
+        { page_id: entry.mealId, command: "update_properties", properties: { "測試資料": "__YES__" }, allow_async: false }, { cache: false });
+    } else {
+      const props = drinkMealProps(drink, Date.now());
+      let id = null;
+      try {
+        id = hlCreatedId(await mcp.callTool("Notion", "notion-create-pages", {
+          parent: { type: "data_source_id", data_source_id: HL_DS.meals },
+          pages: [{ properties: props }],
+          allow_async: false,
+        }, { cache: false }));
+      } catch (err) {
+        if (!AMBIGUOUS.includes(err && err.code)) throw err;
+      }
+      await hlReread(mcp, "meals").catch(() => {});
+      const found = findWebMeal(hl.rows.meals, props);
+      if (!id && !found) return { ok: false };
+      return { ok: true, mealId: id || taskIdOf(found.url) };
+    }
+    await hlReread(mcp, "meals").catch(() => {});
+    return { ok: true };
+  } catch (err) {
+    return { ok: false };
+  }
+}
+
+async function hlWaterWrite(delta, isUndo, drink, entry) {
   const day = butlerToday(Date.now());
   let mcp = null, stage = "read", expected = null;
-  const done = () => {
+  const done = async () => {
+    let meal = { ok: true };
+    if (drink) meal = await hlDrinkMeal(mcp, drink, isUndo, entry);
     if (!isUndo) {
       if (hl.waterUndo.day !== day) hl.waterUndo = { day, amounts: [] };
-      hl.waterUndo.amounts.push(delta);
+      hl.waterUndo.amounts.push({ cc: delta, drink: drink || null, mealId: meal.mealId || null });
     }
     const r = waterRow(hl.rows.habits, day);
-    toast(`${isUndo ? "已減回去" : `喝水 +${fmtNum(delta)}`}｜今天 ${fmtNum(waterTotal(r.stored, r.breakfast))} cc`);
+    const total = `今天 ${fmtNum(waterTotal(r.stored, r.breakfast))} cc`;
+    if (!drink) toast(`${isUndo ? "已減回去" : `喝水 +${fmtNum(delta)}`}｜${total}`);
+    else if (isUndo) toast(`已減回去 ${drink.short}｜${total}`);
+    else toast(`🥤 ${drink.short} +${fmtNum(delta)} cc｜${total}、熱量 +${drink.kcal} 大卡`);
+    if (!meal.ok) {
+      setNotice("hlNotice", isUndo ? `${drink.short}的熱量沒拿掉` : `${drink.short}的熱量沒記到`,
+        isUndo ? "水已經減回去了，飲食那筆還在。跟管家說一聲，請他把那筆勾成測試資料。"
+          : "水已經記了，飲食紀錄那筆沒存進去。按重新整理看「今天吃的」，沒有的話跟管家說「喝了一瓶 FIN」補記熱量（不用再按一次，不然水會算兩次）。");
+    }
   };
   try {
     mcp = await getMcp();
@@ -3013,20 +3074,20 @@ async function hlWaterWrite(delta, isUndo) {
     await mcp.invalidate("Notion").catch(() => {});
     await hlReread(mcp, "habits");
     setNotice("hlNotice", null);
-    done();
+    await done();
   } catch (err) {
     if (stage === "reread") {
       setNotice("hlNotice", "已存進 Notion", "只是重新讀取失敗，按重新整理就會看到。");
-      done();
+      await done();
       return;
     }
     if (stage === "write" && AMBIGUOUS.includes(err && err.code) && mcp) {
       const saved = await hlReread(mcp, "habits").then(() => waterRow(hl.rows.habits, day).stored === expected).catch(() => null);
-      if (saved) { setNotice("hlNotice", null); done(); return; }
+      if (saved) { setNotice("hlNotice", null); await done(); return; }
       setNotice("hlNotice", saved === false ? "沒存到喝水" : "不確定有沒有存到喝水",
         saved === false ? "Notion 沒有回應，重新讀了一次，確定沒存進去。再按一次就好。" : "Notion 沒有回應，也讀不回來。先按重新整理看數字有沒有變，沒變再按一次。");
     } else hlFail(err, "喝水");
-    if (isUndo) hl.waterUndo.amounts.push(-delta);
+    if (isUndo && entry) hl.waterUndo.amounts.push(entry);
   }
 }
 
@@ -3418,10 +3479,8 @@ function hlOpen() {
   };
   $("#hlWaterAdd").addEventListener("click", addCustom);
   $("#hlWaterInput").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } });
-  $("#hlWaterUndo").addEventListener("click", () => {
-    const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
-    if (last) hlWater(-last);
-  });
+  $("#hlWaterUndo").addEventListener("click", hlUndoWater);
+  $("#hlFin").addEventListener("click", () => hlWater(SPORTS_DRINK.cc, SPORTS_DRINK));
   $("#hlWeekPrev").addEventListener("click", () => { hl.week = addDays(hl.week, -7); hl.weekSel = null; renderHealth(); });
   $("#hlWeekNext").addEventListener("click", () => {
     if (canGoNextWeek(hl.week, butlerToday(Date.now()))) { hl.week = addDays(hl.week, 7); hl.weekSel = null; renderHealth(); }
