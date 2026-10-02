@@ -334,6 +334,83 @@ body { padding-block: 20px 108px; }
 .ag-item .tag { font-size: 11.5px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
 .ag-none { color: var(--muted); font-size: 13.5px; }
 .cal .detail .ag-item { margin-top: 5px; }
+/* ---- 健康 ---- */
+.hl-card { background: var(--surface); border-radius: 18px; padding: 14px 16px; display: grid; gap: 16px; min-width: 0; }
+.hl-sec { display: grid; gap: 0; min-width: 0; }
+.meter { display: grid; gap: 6px; }
+.meter-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.meter-name { font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+.meter-val { font-family: var(--font-display); font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums; }
+.meter-val small { font-family: var(--font-body); font-size: 12.5px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.track { height: 10px; border-radius: 999px; background: var(--empty); overflow: hidden; }
+.track i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--c); transition: width .3s ease; }
+.meter-sub { font-size: 13.5px; color: var(--ink); display: flex; gap: 4px 10px; flex-wrap: wrap; align-items: baseline; }
+.meter-sub small { font-size: 12px; color: var(--muted); }
+.water-acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.water-acts .chip { font-variant-numeric: tabular-nums; }
+.chip:disabled { opacity: .45; cursor: default; }
+.hl-in {
+  font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); width: 92px; min-width: 0; font-variant-numeric: tabular-nums;
+}
+.hl-text { font: inherit; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.hl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hl-row .unit { font-size: 13px; color: var(--muted); }
+.chip.n { min-width: 34px; padding: 6px 0; text-align: center; font-variant-numeric: tabular-nums; }
+.wf-est { font-size: 13.5px; color: var(--muted); margin: 0; }
+.wf-est b { color: var(--ink); font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.wf-err { font-size: 13px; color: var(--holiday); margin: 0; }
+
+.ml { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--line); }
+.ml:first-child { border-top: 0; }
+.ml .k { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.ml .n { font-size: 14.5px; overflow-wrap: anywhere; min-width: 0; }
+.ml .n small { display: block; font-size: 12px; color: var(--muted); }
+.ml .v { text-align: right; font-size: 12.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 1.35; }
+.ml .v b { color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+
+.week-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.week-head .section-title { margin: 0; }
+.week-title { margin: 2px 0 0; font-family: var(--font-display); font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.stat { background: var(--surface); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.stat.wide { grid-column: span 2; }
+.stat .s-k { font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+.stat .s-v { font-family: var(--font-display); font-weight: 800; font-size: 24px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .s-v small { font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.stat .s-n { font-size: 11.5px; color: var(--muted); }
+
+.chart-name { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.chart-name .key { display: inline-flex; align-items: center; gap: 6px; }
+.chart-name .key i { width: 14px; border-top: 2px dashed var(--muted); }
+.bars { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; height: 116px; border-bottom: 1px solid var(--line); }
+.bar { position: relative; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; border-radius: 6px 6px 0 0; }
+.bar:disabled { cursor: default; }
+.bar i { display: block; width: min(26px, 72%); border-radius: 4px 4px 0 0; background: var(--c); }
+.bar.sel { background: color-mix(in srgb, var(--c) 10%, transparent); }
+.bar .none { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 11px; color: var(--muted); }
+.goal { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--muted); opacity: .7; pointer-events: none; }
+.bar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-top: 4px; }
+.bar-days span { text-align: center; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.25; }
+.bar-days span.sel { color: var(--ink); font-weight: 700; }
+.bar-days span.future { opacity: .45; }
+.hl-detail { font-size: 13.5px; min-height: 2.6em; border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 2px; }
+.hl-detail .d { font-weight: 700; }
+.hl-detail .muted { color: var(--muted); }
+
+.wc { display: block; width: 100%; height: auto; overflow: visible; }
+.wc text { fill: var(--muted); font-family: var(--font-body); font-size: 11px; font-variant-numeric: tabular-nums; }
+.wc .grid-l { stroke: var(--line); stroke-width: 1; fill: none; }
+.wc .goal-l { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.wc .line { stroke: var(--sleep); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.wc .dot { fill: var(--sleep); stroke: var(--surface); stroke-width: 2; }
+.wc .last { fill: var(--sleep); stroke: var(--surface); stroke-width: 2; }
+.wc text.lab { fill: var(--ink); font-weight: 700; font-size: 12px; }
+.w-one { display: grid; gap: 2px; }
+.w-one b { font-family: var(--font-display); font-weight: 800; font-size: 32px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.w-one b small { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.w-one span { font-size: 12.5px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .track i { transition: none; } }
 </style>
 
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -446,9 +523,116 @@ body { padding-block: 20px 108px; }
   </footer>
 </main>
 
+<main class="wrap" id="tab-health" hidden>
+  <header class="top">
+    <div>
+      <p class="eyebrow">生活管家｜健康</p>
+      <h1 id="hlTitle">今天</h1>
+      <p class="wake-line" id="hlSummary">讀取中…</p>
+    </div>
+    <div class="refresh">
+      <button type="button" id="hlRefreshBtn">重新整理</button>
+      <span class="stamp" id="hlStamp"></span>
+    </div>
+  </header>
+
+  <div class="notice" id="hlNotice" hidden></div>
+
+  <section class="hl-sec" aria-labelledby="hlTodayLabel">
+    <h2 class="section-title" id="hlTodayLabel">今天｜凌晨 4 點換日</h2>
+    <div class="hl-card">
+      <div class="meter" style="--c:var(--wake)">
+        <div class="meter-top"><span class="meter-name">熱量</span><span class="meter-val" id="hlKcalVal"></span></div>
+        <div class="track"><i id="hlKcalBar"></i></div>
+        <div class="meter-sub" id="hlKcalSub"></div>
+      </div>
+      <div class="meter" style="--c:var(--am)">
+        <div class="meter-top"><span class="meter-name">蛋白質</span><span class="meter-val" id="hlProteinVal"></span></div>
+        <div class="track"><i id="hlProteinBar"></i></div>
+        <div class="meter-sub" id="hlProteinSub"></div>
+      </div>
+      <div class="meter" style="--c:var(--thanks)">
+        <div class="meter-top"><span class="meter-name">喝水</span><span class="meter-val" id="hlWaterVal"></span></div>
+        <div class="track"><i id="hlWaterBar"></i></div>
+        <div class="meter-sub" id="hlWaterSub"></div>
+        <div class="water-acts">
+          <button type="button" class="chip" id="hlW500" data-water="500">＋500</button>
+          <button type="button" class="chip" id="hlW600" data-water="600">＋600</button>
+          <button type="button" class="chip" id="hlW1000" data-water="1000">＋1000</button>
+          <input type="number" class="hl-in" id="hlWaterInput" inputmode="numeric" min="1" max="5000" step="50" placeholder="cc" aria-label="自己輸入喝了幾 cc">
+          <button type="button" class="chip" id="hlWaterAdd">加</button>
+          <button type="button" class="chip" id="hlWaterUndo">減回去</button>
+        </div>
+        <div class="meter-sub" id="hlWaterStatus" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hl-sec" aria-labelledby="hlMealsLabel">
+    <h2 class="section-title" id="hlMealsLabel">今天吃的</h2>
+    <div id="hlMeals"></div>
+  </section>
+
+  <section class="hl-sec" id="hlWorkoutsSec" aria-labelledby="hlWorkoutsLabel" hidden>
+    <h2 class="section-title" id="hlWorkoutsLabel">今天的運動</h2>
+    <div class="tk-list" id="hlWorkouts"></div>
+  </section>
+
+  <section class="hl-sec" aria-labelledby="hlWfLabel">
+    <h2 class="section-title" id="hlWfLabel">快速記運動</h2>
+    <div class="hl-card" id="hlWorkoutForm"></div>
+  </section>
+
+  <section class="hl-sec" aria-labelledby="hlWeekLabel">
+    <div class="week-head">
+      <div>
+        <h2 class="section-title" id="hlWeekLabel">這一週</h2>
+        <p class="week-title" id="hlWeekTitle"></p>
+      </div>
+      <div class="nav">
+        <button type="button" id="hlWeekPrev" aria-label="上一週">‹</button>
+        <button type="button" id="hlWeekNext" aria-label="下一週">›</button>
+      </div>
+    </div>
+    <div class="stats" id="hlStats"></div>
+    <div class="hl-card">
+      <div>
+        <div class="chart-name"><span>每天吃進（大卡）</span><span class="key"><i></i><span id="hlGoalKey"></span></span></div>
+        <div class="bars" id="hlKcalChart" style="--c:var(--wake)"></div>
+        <div class="bar-days" id="hlKcalDays" aria-hidden="true"></div>
+      </div>
+      <div>
+        <div class="chart-name"><span>運動消耗（大卡）</span></div>
+        <div class="bars" id="hlBurnChart" style="--c:var(--pm)"></div>
+        <div class="bar-days" id="hlBurnDays" aria-hidden="true"></div>
+      </div>
+      <div class="hl-detail" id="hlWeekDetail" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="hl-sec" aria-labelledby="hlWeightLabel">
+    <h2 class="section-title" id="hlWeightLabel">體重</h2>
+    <div class="hl-card">
+      <form class="hl-row" id="hlWeightForm">
+        <input type="number" class="hl-in" id="hlWeightInput" inputmode="decimal" step="0.1" min="30" max="250" placeholder="87.5" aria-label="今天的體重（公斤）">
+        <span class="unit">公斤</span>
+        <button type="submit" class="btn primary" id="hlWeightSave">儲存</button>
+      </form>
+      <p class="qa-note" id="hlWeightNote"></p>
+      <div id="hlWeightChart"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>飲食請在對話裡拍照或打字跟管家說，記完回來按重新整理。</p>
+    <p>運動消耗不會加回可以吃的量。日常走路不用記，專程去走才記。喝水只算水。</p>
+  </footer>
+</main>
+
 <nav class="tabbar" role="tablist" aria-label="分頁">
   <button type="button" role="tab" data-tab="habits" aria-selected="true">習慣</button>
   <button type="button" role="tab" data-tab="tasks" aria-selected="false">工作</button>
+  <button type="button" role="tab" data-tab="health" aria-selected="false">健康</button>
 </nav>
 
 <script>
@@ -2017,7 +2201,7 @@ function clShift(n) {
 
 // ---- Tabs ----
 const TAB_KEY = "butler-tab-v1";
-const TABS = ["habits", "tasks"];
+const TABS = ["habits", "tasks", "health"];
 let activeTab = "habits";
 function showTab(name) {
   if (!TABS.includes(name)) name = "habits";
@@ -2029,6 +2213,7 @@ function showTab(name) {
   store(TAB_KEY, name);
   window.scrollTo(0, 0);
   if (name === "tasks") { renderTasks(); clOpen(); }
+  if (name === "health" && typeof hlOpen === "function") hlOpen(); // defined in the next script
 }
 
 (function bootTabs() {
@@ -2064,6 +2249,839 @@ function showTab(name) {
   // The old 月曆 tab now lives under 工作.
   const want = (location.hash || "").slice(1) || recall(TAB_KEY) || "habits";
   showTab(want === "cal" ? "tasks" : want);
+})();
+</script>
+
+<script>
+// <logic>
+// ---- 健康: pure rules. Meals and workouts use the 4am day; weight uses the plain Taipei calendar day. ----
+// Goals: change these together with 守則 第 12 章「營養目標」(e.g. 2,100 kcal once the ankle has healed).
+const HEALTH = { kcal: 1850, protein: 140, water: 2600, breakfastWater: 600, targetWeight: 78.3, defaultWeight: 87.7 };
+// Burn = (MET − 1) × kg × hours, rounded to 10. 健身房 is split into weights and cardio.
+const MET = { "排球課": 4.0, "排球（朋友）": 4.0, "健身房重訓": 3.5, "健身房有氧": 7.0, "走路": 4.3, "復健": 2.5, "其他": 4.0 };
+const WORKOUT_TYPES = ["排球課", "排球（朋友）", "健身房", "走路", "復健", "其他"];
+const VOLLEYBALL = ["排球課", "排球（朋友）"];
+const BODY_PARTS = ["胸", "背", "肩", "手臂", "腿", "臀", "核心", "有氧"];
+const WORKOUT_DEFAULT_MIN = { "排球課": 120, "排球（朋友）": 120, "走路": 30 };
+const GYM_DEFAULT = { lift: 60, cardio: 30 };
+const WEB_SOURCE = "網頁快速記";
+// Where a date-only meal sorts among the day's meals.
+const MEAL_CLOCK = { "早餐": "07:00", "午餐": "12:00", "點心": "15:00", "飲料": "15:00", "晚餐": "18:30", "宵夜": "23:00" };
+
+// Notion leaves an empty number field out of the row entirely: that is 0.
+function num(v) {
+  if (v === null || v === undefined || v === "") return 0;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+function hasNum(v) { return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v)); }
+function isTestRow(r) { return isYes(r["測試資料"]) || String(r["標題"] || "").startsWith("【測試】"); }
+function healthDay(raw) {
+  if (!raw) return null;
+  const s = String(raw);
+  if (s.length <= 10) return s;
+  const ms = Date.parse(s);
+  return isNaN(ms) ? s.slice(0, 10) : butlerToday(ms);
+}
+function hlDayTitle(iso) {
+  const [, m, d] = iso.split("-").map(Number);
+  return `${m}/${d}（${WEEK[dow(iso)]}）`;
+}
+function fmtNum(n) { return Math.round(n).toLocaleString("en-US"); }
+
+function burnKcal(met, kg, minutes) { return Math.max(0, Math.round(((met - 1) * kg * (minutes / 60)) / 10) * 10); }
+// A gym session without a split (old rows) counts as all weights.
+function workoutBurn(type, minutes, kg, split) {
+  if (type === "健身房") {
+    if (split) return burnKcal(MET["健身房重訓"], kg, num(split.lift)) + burnKcal(MET["健身房有氧"], kg, num(split.cardio));
+    return burnKcal(MET["健身房重訓"], kg, minutes);
+  }
+  return burnKcal(MET[type] || MET["其他"], kg, minutes);
+}
+
+function normalizeMeal(r) {
+  const raw = r["date:日期:start"];
+  return {
+    id: taskIdOf(r.url), title: String(r["標題"] || ""), day: healthDay(raw), time: taipeiHM(raw),
+    meal: String(r["餐別"] || ""), content: String(r["內容"] || "").trim(),
+    kcal: num(r["估計熱量"]), protein: num(r["估計蛋白質"]), test: isTestRow(r),
+  };
+}
+function normalizeWorkout(r, kg) {
+  const raw = r["date:日期:start"];
+  const type = String(r["類型"] || "其他");
+  const minutes = num(r["時長"]);
+  return {
+    id: taskIdOf(r.url), title: String(r["標題"] || type), day: healthDay(raw), time: taipeiHM(raw), type, minutes,
+    kcal: hasNum(r["消耗大卡"]) ? Number(r["消耗大卡"]) : workoutBurn(type, minutes, kg), test: isTestRow(r),
+  };
+}
+function normalizeBody(r) {
+  return { id: taskIdOf(r.url), day: taipeiDate(r["date:日期:start"]), item: String(r["項目"] || ""), weight: num(r["體重"]), test: isTestRow(r) };
+}
+function latestWeight(bodyRows) {
+  const list = bodyRows.map(normalizeBody).filter((b) => !b.test && b.day && b.weight > 0);
+  list.sort((a, b) => (a.day < b.day ? 1 : a.day > b.day ? -1 : 0));
+  return list.length ? list[0].weight : HEALTH.defaultWeight;
+}
+
+function mealOrderKey(m) {
+  const [hh, mm] = (m.time || MEAL_CLOCK[m.meal] || "12:00").split(":").map(Number);
+  return (hh * 60 + mm - 240 + 1440) % 1440; // minutes since 04:00
+}
+function todayMeals(rows, day) {
+  return rows.map(normalizeMeal).filter((m) => !m.test && m.day === day).sort((a, b) => mealOrderKey(a) - mealOrderKey(b));
+}
+function todayWorkouts(rows, day, kg) {
+  return rows.map((r) => normalizeWorkout(r, kg)).filter((w) => !w.test && w.day === day)
+    .sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
+}
+
+// No red and no judgement when over: just the number.
+function kcalLine(eaten, goal = HEALTH.kcal) {
+  const d = Math.round((goal - eaten) / 10) * 10;
+  return d >= 0 ? `還剩約 ${fmtNum(Math.abs(d))} 大卡` : `超過約 ${fmtNum(-d)} 大卡`;
+}
+function proteinLine(eaten, goal = HEALTH.protein) {
+  const d = goal - eaten;
+  return d <= 0 ? "達標" : `還差 ${fmtNum(Math.ceil(d))} 公克`;
+}
+function waterLine(total, goal = HEALTH.water) { return total >= goal ? "達標" : `還差 ${fmtNum(goal - total)} cc`; }
+
+// The day's habit row: the one the page writes 喝水量 to, plus whether 健康早餐 is ticked.
+function waterRow(habitRows, day) {
+  let row = null, breakfast = false;
+  for (const r of habitRows) {
+    if (isTestRow(r) || rowDate(r["date:日期:start"]) !== day) continue;
+    if (!row && taskIdOf(r.url)) row = r;
+    breakfast = breakfast || isYes(r["健康早餐"]);
+  }
+  return { id: row ? taskIdOf(row.url) : null, stored: row ? num(row["喝水量"]) : 0, breakfast };
+}
+// The breakfast 600 cc is added only on screen, never written into 喝水量.
+function waterTotal(stored, breakfast) { return num(stored) + (breakfast ? HEALTH.breakfastWater : 0); }
+function waterAfter(stored, delta) { return Math.max(0, num(stored) + delta); }
+function waterCreateProps(day, amount) {
+  return { "標題": hlDayTitle(day), "date:日期:start": day, "date:日期:is_datetime": 0, "喝水量": amount };
+}
+
+function weekStart(iso) { return addDays(iso, -((dow(iso) + 6) % 7)); }
+function weekLabel(start) { return `${hlDayTitle(start)}– ${hlDayTitle(addDays(start, 6))}`; }
+function canGoNextWeek(start, today) { return start < weekStart(today); }
+// meals and workouts are normalized rows; habitRows are raw 習慣打卡 rows. Days after today are left out.
+function weekSummary(start, today, meals, workouts, habitRows) {
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(start, i);
+    if (date > today) { days.push({ date, future: true, logged: false, kcal: 0, protein: 0, water: 0, workouts: 0, burn: 0 }); continue; }
+    const ms = meals.filter((m) => !m.test && m.day === date);
+    const ws = workouts.filter((w) => !w.test && w.day === date);
+    const wr = waterRow(habitRows, date);
+    days.push({
+      date, future: false, logged: ms.length > 0,
+      kcal: ms.reduce((s, m) => s + m.kcal, 0), protein: ms.reduce((s, m) => s + m.protein, 0),
+      water: waterTotal(wr.stored, wr.breakfast), workouts: ws.length, burn: ws.reduce((s, w) => s + w.kcal, 0),
+    });
+  }
+  const past = days.filter((d) => !d.future);
+  const logged = past.filter((d) => d.logged);
+  return {
+    start, days, loggedDays: logged.length,
+    avgKcal: logged.length ? Math.round(logged.reduce((s, d) => s + d.kcal, 0) / logged.length) : null,
+    proteinDays: logged.filter((d) => d.protein >= HEALTH.protein).length,
+    waterDays: past.filter((d) => d.water >= HEALTH.water).length,
+    workoutCount: past.reduce((s, d) => s + d.workouts, 0),
+    burnTotal: past.reduce((s, d) => s + d.burn, 0),
+  };
+}
+
+function parseWeight(s) {
+  const n = Number(String(s == null ? "" : s).trim() || NaN);
+  if (!Number.isFinite(n) || n < 30 || n > 250) return null;
+  return Math.round(n * 10) / 10;
+}
+// One 體重 row per Taipei calendar day: update it if it exists. An InBody row that day doesn't count.
+function weightPlan(bodyRows, day, kg) {
+  const hit = bodyRows.find((r) => !isTestRow(r) && r["項目"] === "體重" && taipeiDate(r["date:日期:start"]) === day && taskIdOf(r.url));
+  if (hit) return { action: "update", id: taskIdOf(hit.url), props: { "體重": kg } };
+  return { action: "create", props: { "標題": `${day} 體重`, "date:日期:start": day, "date:日期:is_datetime": 0, "項目": "體重", "體重": kg } };
+}
+function weightSeries(bodyRows) {
+  return bodyRows.map(normalizeBody)
+    .filter((b) => !b.test && b.day && b.weight > 0 && (b.item === "體重" || b.item === "InBody"))
+    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0))
+    .map((b) => ({ day: b.day, kg: b.weight, item: b.item }));
+}
+
+function workoutTitle(type, parts) {
+  if (type !== "健身房") return type;
+  const named = parts.filter((p) => p !== "有氧");
+  if (named.length) return `健身房｜${named.join("＋")}`;
+  return parts.includes("有氧") ? "健身房｜有氧" : "健身房";
+}
+function intIn(v, lo, hi) {
+  if (v === "" || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isInteger(n) && n >= lo && n <= hi ? n : null;
+}
+// Form values in, a checked entry out (or {error}).
+function workoutEntry(input, kg) {
+  const o = input || {};
+  const type = o.type;
+  if (!WORKOUT_TYPES.includes(type)) return { error: "先選一個項目" };
+  let minutes, split = null, parts = [], learned = "";
+  if (type === "健身房") {
+    const lift = o.lift === "" || o.lift == null ? 0 : intIn(o.lift, 0, 300);
+    const cardio = o.cardio === "" || o.cardio == null ? 0 : intIn(o.cardio, 0, 300);
+    if (lift === null || cardio === null || lift + cardio === 0) return { error: "重訓和有氧填 0～300 分鐘，至少一格大於 0" };
+    split = { lift, cardio };
+    minutes = lift + cardio;
+    parts = BODY_PARTS.filter((p) => Array.isArray(o.parts) && o.parts.includes(p));
+  } else {
+    minutes = intIn(o.minutes, 1, 600);
+    if (minutes === null) return { error: "分鐘數填 1～600" };
+    if (VOLLEYBALL.includes(type)) learned = String(o.learned || "").trim().slice(0, 500);
+  }
+  return {
+    type, minutes, split, parts, learned,
+    effort: intIn(o.effort, 1, 10), sore: String(o.sore || "").trim().slice(0, 200),
+    kcal: workoutBurn(type, minutes, kg, split), title: workoutTitle(type, parts),
+  };
+}
+function nowTaipeiISO(ms) { return new Date(ms + 8 * 3600e3).toISOString().slice(0, 19) + "+08:00"; }
+function workoutProps(e, ms) {
+  const p = {
+    "標題": e.title, "date:日期:start": nowTaipeiISO(ms), "date:日期:is_datetime": 1,
+    "類型": e.type, "時長": e.minutes, "消耗大卡": e.kcal, "原始輸入": WEB_SOURCE,
+  };
+  if (e.effort) p["累的程度"] = e.effort;
+  if (e.sore) p["痠痛或不適"] = e.sore;
+  if (e.parts.length) p["部位"] = JSON.stringify(e.parts);
+  if (e.learned) p["學到什麼／下次改進"] = e.learned;
+  return p;
+}
+function savedLine(e) { return `已記：${e.title} ${e.minutes} 分鐘，約 ${fmtNum(e.kcal)} 大卡`; }
+// After an unclear write: is the row we sent already in Notion?
+function findWebWorkout(rows, props) {
+  const at = Date.parse(props["date:日期:start"]);
+  return rows.find((r) => r["原始輸入"] === WEB_SOURCE && r["標題"] === props["標題"] && Date.parse(r["date:日期:start"]) === at) || null;
+}
+// </logic>
+
+// ---- 健康 ----
+const HL_VIEWS = {
+  meals: "view://3ea49a21-5d5f-8150-81e9-000c7b9d6d26",
+  workouts: "view://3ea49a21-5d5f-8105-b34f-000c483a36c1",
+  body: "view://3ea49a21-5d5f-8175-a016-000c1d0d50fa",
+  habits: VIEW_URL,
+};
+const HL_DS = { workouts: "4fe51ae5-8ad6-4a84-b915-288f5999ba9a", body: "814f4577-c34f-433b-80cd-9a50dcdff083", habits: DATA_SOURCE_ID };
+const HL_CACHE = "health-cache-v1";
+const HL_DROP = ["needs_reauth", "server_not_connected", "blocked_by_policy", "approval_required", "not_in_manifest"];
+const hl = {
+  rows: { meals: [], workouts: [], body: [], habits: [] }, fetchedAt: null, loading: false, lastTry: 0,
+  live: false, busy: null, week: null, weekSel: null, weekHover: null,
+  waterPending: 0, waterChain: Promise.resolve(), waterUndo: { day: null, amounts: [] },
+};
+const wf = { type: null, minutes: "", lift: "", cardio: "", effort: null, parts: [], sore: "", learned: "", err: "" };
+
+function hlStore() { store(HL_CACHE, { rows: hl.rows, fetchedAt: hl.fetchedAt }); }
+function hlCanSave() { return hl.live && !hl.busy; }
+
+async function hlLoad(fresh) {
+  if (hl.loading) return;
+  hl.loading = true;
+  hl.lastTry = Date.now();
+  const btn = $("#hlRefreshBtn");
+  btn.disabled = true;
+  btn.textContent = "讀取中…";
+  renderHealth();
+  try {
+    const mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    const keys = Object.keys(HL_VIEWS);
+    const res = await Promise.all(keys.map((k) => readView(mcp, HL_VIEWS[k], fresh)));
+    keys.forEach((k, i) => { hl.rows[k] = res[i].rows; });
+    hl.fetchedAt = Math.min(...res.map((r) => r.storedAt));
+    hl.live = true;
+    hlStore();
+    setNotice("hlNotice", null);
+  } catch (err) {
+    hl.live = false;
+    const [title, body] = explain(err);
+    const stale = hl.fetchedAt ? `（下面是 ${fmtStamp(hl.fetchedAt).replace("更新", "")}的資料，連上之前不能儲存）` : "";
+    setNotice("hlNotice", title, body + stale);
+    if (HL_DROP.includes(err && err.code)) {
+      hl.rows = { meals: [], workouts: [], body: [], habits: [] };
+      hl.fetchedAt = null;
+    }
+  } finally {
+    hl.loading = false;
+    btn.disabled = false;
+    btn.textContent = "重新整理";
+    renderHealth();
+  }
+}
+async function hlReread(mcp, key) {
+  const { rows, storedAt } = await readView(mcp, HL_VIEWS[key], true);
+  hl.rows[key] = rows;
+  hl.fetchedAt = storedAt;
+  hlStore();
+}
+function hlCreatedId(res) {
+  const p = parsePayload(res);
+  const pg = p && Array.isArray(p.pages) ? p.pages[0] : null;
+  return pg ? taskIdOf(pg.url) || (pg.id ? String(pg.id) : null) : null;
+}
+function hlFail(err, what) {
+  const [title, body] = explain(err);
+  setNotice("hlNotice", `沒存到${what}：${title}`, body);
+}
+
+// ---- render ----
+function setMeter(key, value, goal, valText, subNodes) {
+  $(`#hl${key}Val`).textContent = "";
+  $(`#hl${key}Val`).append(valText[0], h("small", "", valText[1]));
+  $(`#hl${key}Bar`).style.width = `${Math.min(100, goal ? (value / goal) * 100 : 0)}%`;
+  const sub = $(`#hl${key}Sub`);
+  sub.textContent = "";
+  sub.append(...subNodes);
+}
+
+function renderHealth() {
+  const today = butlerToday(Date.now());
+  const kg = latestWeight(hl.rows.body);
+  const meals = todayMeals(hl.rows.meals, today);
+  const works = todayWorkouts(hl.rows.workouts, today, kg);
+  const water = waterRow(hl.rows.habits, today);
+  const drunk = waterTotal(water.stored, water.breakfast);
+  const kcal = meals.reduce((s, m) => s + m.kcal, 0);
+  const protein = meals.reduce((s, m) => s + m.protein, 0);
+
+  $("#hlTitle").textContent = hlDayTitle(today);
+  $("#hlStamp").textContent = fmtStamp(hl.fetchedAt);
+  $("#hlSummary").textContent = !hl.fetchedAt ? (hl.loading ? "讀取中…" : "還沒讀到資料")
+    : meals.length ? `今天記了 ${meals.length} 筆飲食${works.length ? `、${works.length} 次運動` : ""}` : "今天還沒記飲食";
+
+  setMeter("Kcal", kcal, HEALTH.kcal, [fmtNum(kcal), ` / ${fmtNum(HEALTH.kcal)} 大卡`], [kcalLine(kcal)]);
+  setMeter("Protein", protein, HEALTH.protein, [fmtNum(protein), ` / ${fmtNum(HEALTH.protein)} 公克`], [proteinLine(protein)]);
+  setMeter("Water", drunk, HEALTH.water, [fmtNum(drunk), ` / ${fmtNum(HEALTH.water)} cc`],
+    water.breakfast ? [waterLine(drunk), h("small", "", `含早餐 ${HEALTH.breakfastWater}`)] : [waterLine(drunk)]);
+  renderWaterControls(today);
+
+  const list = $("#hlMeals");
+  list.textContent = "";
+  if (!meals.length) list.append(h("div", "empty", hl.fetchedAt ? "今天還沒記。拍照或打字跟管家說" : hl.loading ? "正在讀 Notion 的飲食紀錄…" : "還沒讀到飲食紀錄。按右上角的重新整理再試一次。"));
+  else {
+    const box = h("div", "tk-list");
+    for (const m of meals) {
+      const row = h("div", "ml");
+      const n = h("span", "n", m.content || m.title);
+      if (m.time) n.append(h("small", "", m.time));
+      const v = h("span", "v");
+      v.append(h("b", "", fmtNum(m.kcal)), " 大卡", document.createElement("br"), `蛋白質 ${fmtNum(m.protein)} g`);
+      row.append(h("span", "k", m.meal || "—"), n, v);
+      box.append(row);
+    }
+    list.append(box);
+  }
+
+  $("#hlWorkoutsSec").hidden = !works.length;
+  const wl = $("#hlWorkouts");
+  wl.textContent = "";
+  for (const w of works) {
+    const row = h("div", "ml");
+    const n = h("span", "n", w.title);
+    if (w.time) n.append(h("small", "", w.time));
+    const v = h("span", "v");
+    v.append(`${fmtNum(w.minutes)} 分鐘`, document.createElement("br"), "約 ", h("b", "", fmtNum(w.kcal)), " 大卡");
+    row.append(h("span", "k", w.type), n, v);
+    wl.append(row);
+  }
+
+  renderWorkoutButtons();
+  renderWeek(today, kg);
+  renderWeight();
+}
+
+function renderWaterControls(today) {
+  if (hl.waterUndo.day !== today) hl.waterUndo = { day: today, amounts: [] };
+  const off = !hl.live;
+  document.querySelectorAll("#tab-health [data-water]").forEach((b) => { b.disabled = off; });
+  $("#hlWaterAdd").disabled = off;
+  $("#hlWaterInput").disabled = off;
+  const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
+  const undo = $("#hlWaterUndo");
+  undo.disabled = off || !last;
+  undo.textContent = last ? `減回去 ${fmtNum(last)}` : "減回去";
+  $("#hlWaterStatus").textContent = hl.waterPending ? `存檔中…${hl.waterPending > 1 ? `（還有 ${hl.waterPending - 1} 筆排隊）` : ""}` : "";
+}
+
+// ---- 喝水: presses queue up; each one re-reads, writes, re-reads. ----
+function hlWater(delta) {
+  if (!hl.live || !delta) return;
+  const isUndo = delta < 0;
+  if (isUndo) hl.waterUndo.amounts.pop();
+  hl.waterPending++;
+  renderWaterControls(butlerToday(Date.now()));
+  hl.waterChain = hl.waterChain
+    .then(() => hlWaterWrite(delta, isUndo))
+    .catch(() => {})
+    .finally(() => { hl.waterPending--; renderHealth(); });
+}
+
+async function hlWaterWrite(delta, isUndo) {
+  const day = butlerToday(Date.now());
+  let mcp = null, stage = "read", expected = null;
+  const done = () => {
+    if (!isUndo) {
+      if (hl.waterUndo.day !== day) hl.waterUndo = { day, amounts: [] };
+      hl.waterUndo.amounts.push(delta);
+    }
+    const r = waterRow(hl.rows.habits, day);
+    toast(`${isUndo ? "已減回去" : `喝水 +${fmtNum(delta)}`}｜今天 ${fmtNum(waterTotal(r.stored, r.breakfast))} cc`);
+  };
+  try {
+    mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    await hlReread(mcp, "habits");
+    const row = waterRow(hl.rows.habits, day);
+    expected = waterAfter(row.stored, delta);
+    stage = "write";
+    if (row.id) {
+      await mcp.callTool("Notion", "notion-update-page",
+        { page_id: row.id, command: "update_properties", properties: { "喝水量": expected }, allow_async: false }, { cache: false });
+    } else {
+      await mcp.callTool("Notion", "notion-create-pages", {
+        parent: { type: "data_source_id", data_source_id: HL_DS.habits },
+        pages: [{ properties: waterCreateProps(day, expected) }],
+        allow_async: false,
+      }, { cache: false });
+    }
+    stage = "reread";
+    await mcp.invalidate("Notion").catch(() => {});
+    await hlReread(mcp, "habits");
+    setNotice("hlNotice", null);
+    done();
+  } catch (err) {
+    if (stage === "reread") {
+      setNotice("hlNotice", "已存進 Notion", "只是重新讀取失敗，按重新整理就會看到。");
+      done();
+      return;
+    }
+    if (stage === "write" && AMBIGUOUS.includes(err && err.code) && mcp) {
+      const saved = await hlReread(mcp, "habits").then(() => waterRow(hl.rows.habits, day).stored === expected).catch(() => null);
+      if (saved) { setNotice("hlNotice", null); done(); return; }
+      setNotice("hlNotice", saved === false ? "沒存到喝水" : "不確定有沒有存到喝水",
+        saved === false ? "Notion 沒有回應，重新讀了一次，確定沒存進去。再按一次就好。" : "Notion 沒有回應，也讀不回來。先按重新整理看數字有沒有變，沒變再按一次。");
+    } else hlFail(err, "喝水");
+    if (isUndo) hl.waterUndo.amounts.push(-delta);
+  }
+}
+
+// ---- 快速記運動 ----
+function wfSync() {
+  for (const k of ["minutes", "lift", "cardio", "sore", "learned"]) {
+    const el = document.getElementById("wf-" + k);
+    if (el) wf[k] = el.value;
+  }
+}
+function wfEstimate() {
+  const e = workoutEntry(wf, latestWeight(hl.rows.body));
+  const box = $("#wf-est");
+  if (!box) return e;
+  box.textContent = "";
+  if (e.error) box.append(wf.type ? "填好分鐘數就會算消耗" : "");
+  else box.append("約 ", h("b", "", fmtNum(e.kcal)), ` 大卡（${e.minutes} 分鐘，用體重 ${latestWeight(hl.rows.body)} 公斤算）`);
+  return e;
+}
+function chipRow(items, isOn, onClick, cls) {
+  const row = h("div", "chips");
+  for (const it of items) {
+    const b = h("button", "chip" + (cls ? " " + cls : ""), String(it));
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(isOn(it)));
+    b.addEventListener("click", () => { wfSync(); onClick(it); wf.err = ""; renderWorkoutForm(); });
+    row.append(b);
+  }
+  return row;
+}
+function wfNumber(id, value, label) {
+  const i = h("input", "hl-in");
+  i.type = "number";
+  i.id = id;
+  i.inputMode = "numeric";
+  i.min = "0";
+  i.max = "600";
+  i.step = "5";
+  i.value = value;
+  i.setAttribute("aria-label", label);
+  i.addEventListener("input", () => { wfSync(); wfEstimate(); });
+  return i;
+}
+function wfText(id, value, placeholder) {
+  const i = h("input", "hl-text");
+  i.type = "text";
+  i.id = id;
+  i.value = value;
+  i.maxLength = 300;
+  i.placeholder = placeholder;
+  i.addEventListener("input", wfSync);
+  return i;
+}
+
+function renderWorkoutForm() {
+  const card = $("#hlWorkoutForm");
+  card.textContent = "";
+  card.append(qaField("項目", chipRow(WORKOUT_TYPES, (t) => wf.type === t, (t) => {
+    if (wf.type === t) return;
+    wf.type = t;
+    wf.minutes = WORKOUT_DEFAULT_MIN[t] != null ? String(WORKOUT_DEFAULT_MIN[t]) : "";
+    wf.lift = String(GYM_DEFAULT.lift);
+    wf.cardio = String(GYM_DEFAULT.cardio);
+    if (t !== "健身房") wf.parts = [];
+  })));
+  if (!wf.type) {
+    card.append(h("p", "qa-note", "選一個項目就能記。日常走路不用記，專程去走才記。"));
+    return;
+  }
+  if (wf.type === "健身房") {
+    const row = h("div", "hl-row");
+    row.append(wfNumber("wf-lift", wf.lift, "重訓幾分鐘"), h("span", "unit", "分鐘重訓"),
+      wfNumber("wf-cardio", wf.cardio, "有氧幾分鐘"), h("span", "unit", "分鐘有氧"));
+    card.append(qaField("時間", row));
+    card.append(qaField("部位（可以不選）", chipRow(BODY_PARTS, (p) => wf.parts.includes(p),
+      (p) => { wf.parts = wf.parts.includes(p) ? wf.parts.filter((x) => x !== p) : [...wf.parts, p]; })));
+  } else {
+    const row = h("div", "hl-row");
+    row.append(wfNumber("wf-minutes", wf.minutes, "幾分鐘"), h("span", "unit", "分鐘"));
+    card.append(qaField("時間", row));
+  }
+  card.append(qaField("累的程度（1 輕鬆～10 累爆，可以不選）", chipRow([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (n) => wf.effort === n,
+    (n) => { wf.effort = wf.effort === n ? null : n; }, "n")));
+  card.append(qaField("痠痛或不適（可以不填）", wfText("wf-sore", wf.sore, "例：左腳踝有點痠")));
+  if (VOLLEYBALL.includes(wf.type)) card.append(qaField("學到什麼／下次改進（可以不填）", wfText("wf-learned", wf.learned, "例：等球到最高點再跳")));
+  const est = h("p", "wf-est");
+  est.id = "wf-est";
+  card.append(est);
+  if (wf.err) card.append(h("p", "wf-err", wf.err));
+  const row = h("div", "tk-acts");
+  const save = h("button", "btn primary", hl.busy === "workout" ? "存檔中…" : "記下");
+  save.type = "button";
+  save.id = "wfSave";
+  save.addEventListener("click", hlSaveWorkout);
+  const cancel = h("button", "btn", "取消");
+  cancel.type = "button";
+  cancel.id = "wfCancel";
+  cancel.addEventListener("click", () => { Object.assign(wf, { type: null, parts: [], effort: null, sore: "", learned: "", err: "" }); renderWorkoutForm(); });
+  row.append(save, cancel);
+  card.append(row);
+  renderWorkoutButtons();
+  wfEstimate();
+}
+function renderWorkoutButtons() {
+  const save = $("#wfSave");
+  if (save) {
+    save.disabled = !hlCanSave();
+    save.textContent = hl.busy === "workout" ? "存檔中…" : "記下";
+  }
+  const cancel = $("#wfCancel");
+  if (cancel) cancel.disabled = hl.busy === "workout";
+}
+
+async function hlSaveWorkout() {
+  if (!hlCanSave()) return;
+  wfSync();
+  const e = workoutEntry(wf, latestWeight(hl.rows.body));
+  if (e.error) { wf.err = e.error; renderWorkoutForm(); return; }
+  const props = workoutProps(e, Date.now());
+  hl.busy = "workout";
+  renderWorkoutButtons();
+  let mcp = null, stage = "read", id = null;
+  const done = () => {
+    Object.assign(wf, { type: null, parts: [], effort: null, sore: "", learned: "", err: "" });
+    renderWorkoutForm();
+    actionToast(savedLine(e), "復原", () => hlUndoWorkout(id, e.title));
+  };
+  try {
+    mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    await hlReread(mcp, "workouts");
+    stage = "write";
+    const res = await mcp.callTool("Notion", "notion-create-pages", {
+      parent: { type: "data_source_id", data_source_id: HL_DS.workouts },
+      pages: [{ properties: props }],
+      allow_async: false,
+    }, { cache: false });
+    id = hlCreatedId(res);
+    stage = "reread";
+    await mcp.invalidate("Notion").catch(() => {});
+    await hlReread(mcp, "workouts");
+    if (!id) { const r = findWebWorkout(hl.rows.workouts, props); id = r ? taskIdOf(r.url) : null; }
+    setNotice("hlNotice", null);
+    hl.busy = null;
+    done();
+  } catch (err) {
+    hl.busy = null;
+    if (stage === "reread") {
+      setNotice("hlNotice", "已存進 Notion", "只是重新讀取失敗，按重新整理就會看到。");
+      done();
+    } else if (stage === "write" && AMBIGUOUS.includes(err && err.code) && mcp) {
+      const found = await hlReread(mcp, "workouts").then(() => findWebWorkout(hl.rows.workouts, props)).catch(() => undefined);
+      if (found) { id = taskIdOf(found.url); setNotice("hlNotice", null); done(); }
+      else if (found === null) setNotice("hlNotice", "沒存到運動", "Notion 沒有回應，重新讀了一次，確定沒存進去。再按一次「記下」就好。");
+      else setNotice("hlNotice", "不確定有沒有存到運動", "Notion 沒有回應，也讀不回來。先按重新整理，看「今天的運動」有沒有這一筆，沒有再記一次。");
+    } else hlFail(err, "運動");
+  } finally {
+    hl.busy = null;
+    renderHealth();
+  }
+}
+
+// 網頁不能刪 Notion 資料：復原 = 把那筆勾成測試資料，之後就不計入。
+async function hlUndoWorkout(id, title) {
+  if (!id) { setNotice("hlNotice", "沒辦法復原", `找不到剛剛那筆「${title}」。跟管家說一聲，請他把它勾成測試資料。`); return; }
+  hl.busy = "undo";
+  renderHealth();
+  try {
+    const mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    await mcp.callTool("Notion", "notion-update-page",
+      { page_id: id, command: "update_properties", properties: { "測試資料": "__YES__" }, allow_async: false }, { cache: false });
+    await mcp.invalidate("Notion").catch(() => {});
+    await hlReread(mcp, "workouts").catch(() => {});
+    setNotice("hlNotice", null);
+    toast(`已復原：${title}（不再計入）`);
+  } catch (err) {
+    const [t, body] = explain(err);
+    setNotice("hlNotice", `沒復原：${t}`, `${body} 「${title}」還在紀錄裡，可以再按一次，或跟管家說。`);
+  } finally {
+    hl.busy = null;
+    renderHealth();
+  }
+}
+
+// ---- 這一週 ----
+function renderWeek(today, kg) {
+  const thisWeek = weekStart(today);
+  if (!hl.week || hl.week > thisWeek) hl.week = thisWeek;
+  const meals = hl.rows.meals.map(normalizeMeal);
+  const works = hl.rows.workouts.map((r) => normalizeWorkout(r, kg));
+  const w = weekSummary(hl.week, today, meals, works, hl.rows.habits);
+  $("#hlWeekTitle").textContent = weekLabel(hl.week) + (hl.week === thisWeek ? "・本週" : "");
+  $("#hlWeekNext").disabled = !canGoNextWeek(hl.week, today);
+  $("#hlGoalKey").textContent = `目標 ${fmtNum(HEALTH.kcal)}`;
+
+  const stats = $("#hlStats");
+  stats.textContent = "";
+  const tile = (k, v, unit, note, wide) => {
+    const t = h("div", "stat" + (wide ? " wide" : ""));
+    const val = h("div", "s-v", v);
+    if (unit && v !== "–") val.append(h("small", "", unit));
+    t.append(h("div", "s-k", k), val);
+    if (note) t.append(h("div", "s-n", note));
+    stats.append(t);
+  };
+  tile("平均每天吃進", w.avgKcal == null ? "–" : fmtNum(w.avgKcal), "大卡",
+    w.loggedDays ? `記了 ${w.loggedDays} 天，只算有記的日子` : "這週還沒記飲食", true);
+  tile("蛋白質達標", String(w.proteinDays), "天", `≥ ${HEALTH.protein} 公克`);
+  tile("喝水達標", String(w.waterDays), "天", `≥ ${fmtNum(HEALTH.water)} cc`);
+  tile("運動", String(w.workoutCount), "次");
+  tile("運動消耗", fmtNum(w.burnTotal), "大卡", "約略估算");
+
+  const kcalMax = Math.max(HEALTH.kcal * 1.25, ...w.days.map((d) => d.kcal));
+  const burnMax = Math.max(300, ...w.days.map((d) => d.burn));
+  if (!w.days.some((d) => d.date === hl.weekSel)) hl.weekSel = null;
+  drawBars("#hlKcalChart", "#hlKcalDays", w.days, (d) => (d.logged ? d.kcal : null), kcalMax, HEALTH.kcal, today);
+  drawBars("#hlBurnChart", "#hlBurnDays", w.days, (d) => (d.workouts ? d.burn : null), burnMax, null, today);
+  renderWeekDetail(w);
+}
+
+function drawBars(chartSel, daysSel, days, valueOf, max, goal, today) {
+  const chart = $(chartSel), labels = $(daysSel);
+  chart.textContent = "";
+  labels.textContent = "";
+  for (const d of days) {
+    const v = d.future ? null : valueOf(d);
+    const b = h("button", "bar" + (d.date === hl.weekSel ? " sel" : ""));
+    b.type = "button";
+    b.disabled = d.future;
+    b.setAttribute("aria-label", `${hlDayTitle(d.date)}${d.future ? "：還沒到" : v == null ? "：沒有紀錄" : `：${fmtNum(v)} 大卡`}`);
+    if (v != null) {
+      const bar = h("i");
+      bar.style.height = `${Math.max(2, (v / max) * 100)}%`;
+      b.append(bar);
+    } else if (!d.future) b.append(h("span", "none", "–"));
+    b.addEventListener("click", () => { hl.weekHover = null; hl.weekSel = hl.weekSel === d.date ? null : d.date; renderHealth(); });
+    b.addEventListener("mouseenter", () => { hl.weekHover = d.date; renderWeekDetailFromState(); });
+    b.addEventListener("mouseleave", () => { hl.weekHover = null; renderWeekDetailFromState(); });
+    chart.append(b);
+    const lab = h("span", (d.date === hl.weekSel ? "sel" : "") + (d.future ? " future" : ""));
+    lab.append(WEEK[dow(d.date)], document.createElement("br"), String(Number(d.date.slice(8))));
+    if (d.date === today) lab.style.fontWeight = "700";
+    labels.append(lab);
+  }
+  if (goal) {
+    const g = h("div", "goal");
+    g.style.bottom = `${(goal / max) * 100}%`;
+    chart.append(g);
+  }
+}
+
+let hlLastWeek = null;
+function renderWeekDetail(w) { hlLastWeek = w; renderWeekDetailFromState(); }
+function renderWeekDetailFromState() {
+  const box = $("#hlWeekDetail");
+  if (!box || !hlLastWeek) return;
+  box.textContent = "";
+  const date = hl.weekHover || hl.weekSel;
+  const d = hlLastWeek.days.find((x) => x.date === date);
+  if (!d || d.future) { box.append(h("span", "muted", "點一天的長條，看那天的數字")); return; }
+  box.append(h("span", "d", hlDayTitle(d.date)));
+  box.append(h("span", "", d.logged ? `吃進 ${fmtNum(d.kcal)} 大卡｜蛋白質 ${fmtNum(d.protein)} 公克` : "這天沒記飲食"));
+  box.append(h("span", "", `喝水 ${fmtNum(d.water)} cc${d.water >= HEALTH.water ? "（達標）" : ""}`));
+  box.append(h("span", "", d.workouts ? `運動 ${d.workouts} 次，約 ${fmtNum(d.burn)} 大卡` : "沒有運動紀錄"));
+}
+
+// ---- 體重 ----
+function renderWeight() {
+  const day = taipeiToday(Date.now());
+  const plan = weightPlan(hl.rows.body, day, 0);
+  const note = $("#hlWeightNote");
+  if (plan.action === "update") {
+    const cur = normalizeBody(hl.rows.body.find((r) => taskIdOf(r.url) === plan.id));
+    note.textContent = `今天 ${hlDayTitle(day)} 已經記了 ${cur.weight} 公斤，再儲存會改掉那一筆。`;
+  } else note.textContent = `記在今天 ${hlDayTitle(day)}。`;
+  const save = $("#hlWeightSave");
+  save.disabled = !hlCanSave();
+  save.textContent = hl.busy === "weight" ? "存檔中…" : "儲存";
+  renderWeightChart(weightSeries(hl.rows.body));
+}
+
+function renderWeightChart(series) {
+  const box = $("#hlWeightChart");
+  box.textContent = "";
+  if (!series.length) { box.append(h("div", "ag-none", hl.fetchedAt ? "還沒有體重紀錄" : "")); return; }
+  const last = series[series.length - 1];
+  if (series.length === 1) {
+    const one = h("div", "w-one");
+    const b = h("b", "", String(last.kg));
+    b.append(h("small", "", "公斤"));
+    one.append(b, h("span", "", `${hlDayTitle(last.day)}・${last.item}｜目標 ${HEALTH.targetWeight} 公斤`));
+    box.append(one);
+    return;
+  }
+  const W = 340, H = 170, L = 34, R = 44, T = 16, B = 24;
+  const t0 = Date.parse(series[0].day), t1 = Date.parse(last.day);
+  const kgs = series.map((p) => p.kg).concat(HEALTH.targetWeight);
+  const lo = Math.floor(Math.min(...kgs) - 1), hi = Math.ceil(Math.max(...kgs) + 1);
+  const x = (day) => L + (t1 === t0 ? (W - L - R) / 2 : ((Date.parse(day) - t0) / (t1 - t0)) * (W - L - R));
+  const y = (kg) => T + ((hi - kg) / (hi - lo)) * (H - T - B);
+  const step = hi - lo > 12 ? 5 : hi - lo > 5 ? 2 : 1;
+  let grid = "";
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+    grid += `<line class="grid-l" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  const pts = series.map((p) => `${x(p.day).toFixed(1)},${y(p.kg).toFixed(1)}`).join(" ");
+  const dots = series.slice(0, -1).map((p) => `<circle class="dot" cx="${x(p.day).toFixed(1)}" cy="${y(p.kg).toFixed(1)}" r="3"><title>${hlDayTitle(p.day)} ${p.kg} 公斤</title></circle>`).join("");
+  const md = (day) => `${Number(day.slice(5, 7))}/${Number(day.slice(8))}`;
+  const ty = y(HEALTH.targetWeight);
+  box.innerHTML = `<svg class="wc" viewBox="0 0 ${W} ${H}" role="img" aria-label="體重曲線：最新 ${last.kg} 公斤（${md(last.day)}），目標 ${HEALTH.targetWeight} 公斤">
+    ${grid}
+    <line class="goal-l" x1="${L}" x2="${W - R}" y1="${ty}" y2="${ty}"/>
+    <text x="${W - R + 4}" y="${ty + 4}">目標 ${HEALTH.targetWeight}</text>
+    <polyline class="line" points="${pts}"/>
+    ${dots}
+    <circle class="last" cx="${x(last.day).toFixed(1)}" cy="${y(last.kg).toFixed(1)}" r="5"><title>${hlDayTitle(last.day)} ${last.kg} 公斤</title></circle>
+    <text class="lab" x="${(x(last.day) + 8).toFixed(1)}" y="${(y(last.kg) + 4).toFixed(1)}">${last.kg}</text>
+    <text x="${L}" y="${H - 6}">${md(series[0].day)}</text>
+    <text x="${W - R}" y="${H - 6}" text-anchor="end">${md(last.day)}</text>
+  </svg>`;
+}
+
+async function hlSaveWeight() {
+  if (!hlCanSave()) return;
+  const input = $("#hlWeightInput");
+  const kg = parseWeight(input.value);
+  if (kg == null) { $("#hlWeightNote").textContent = "請輸入 30～250 之間的數字，例如 87.5"; input.focus(); return; }
+  const day = taipeiToday(Date.now());
+  hl.busy = "weight";
+  renderHealth();
+  let mcp = null, stage = "read";
+  const savedNow = () => hl.rows.body.some((r) => !isTestRow(r) && r["項目"] === "體重" && taipeiDate(r["date:日期:start"]) === day && num(r["體重"]) === kg);
+  const done = () => { input.value = ""; toast(`已記：${hlDayTitle(day)} 體重 ${kg} 公斤`); };
+  try {
+    mcp = await getMcp();
+    if (!mcp) throw { code: "not_granted" };
+    await hlReread(mcp, "body");
+    const plan = weightPlan(hl.rows.body, day, kg);
+    stage = "write";
+    if (plan.action === "update") {
+      await mcp.callTool("Notion", "notion-update-page",
+        { page_id: plan.id, command: "update_properties", properties: plan.props, allow_async: false }, { cache: false });
+    } else {
+      await mcp.callTool("Notion", "notion-create-pages", {
+        parent: { type: "data_source_id", data_source_id: HL_DS.body },
+        pages: [{ properties: plan.props }],
+        allow_async: false,
+      }, { cache: false });
+    }
+    stage = "reread";
+    await mcp.invalidate("Notion").catch(() => {});
+    await hlReread(mcp, "body");
+    setNotice("hlNotice", null);
+    done();
+  } catch (err) {
+    if (stage === "reread") { setNotice("hlNotice", "已存進 Notion", "只是重新讀取失敗，按重新整理就會看到。"); done(); }
+    else if (stage === "write" && AMBIGUOUS.includes(err && err.code) && mcp) {
+      const ok = await hlReread(mcp, "body").then(savedNow).catch(() => null);
+      if (ok) { setNotice("hlNotice", null); done(); }
+      else if (ok === false) setNotice("hlNotice", "沒存到體重", "Notion 沒有回應，重新讀了一次，確定沒存進去。再按一次儲存就好。");
+      else setNotice("hlNotice", "不確定有沒有存到體重", "Notion 沒有回應，也讀不回來。先按重新整理看曲線有沒有今天這一點，沒有再存一次。");
+    } else hlFail(err, "體重");
+  } finally {
+    hl.busy = null;
+    renderHealth();
+  }
+}
+
+function hlOpen() {
+  renderHealth();
+  if (!hl.live || Date.now() - hl.lastTry > 60000) hlLoad(false);
+}
+
+(function bootHealth() {
+  const cached = recall(HL_CACHE);
+  if (cached && cached.rows && typeof cached.rows === "object") {
+    for (const k of Object.keys(hl.rows)) if (Array.isArray(cached.rows[k])) hl.rows[k] = cached.rows[k];
+    hl.fetchedAt = cached.fetchedAt || null;
+  }
+  $("#hlRefreshBtn").addEventListener("click", () => hlLoad(true));
+  document.querySelectorAll("#tab-health [data-water]").forEach((b) => b.addEventListener("click", () => hlWater(Number(b.dataset.water))));
+  const addCustom = () => {
+    const input = $("#hlWaterInput");
+    const n = intIn(input.value, 1, 5000);
+    if (n == null) { input.focus(); return; }
+    input.value = "";
+    hlWater(n);
+  };
+  $("#hlWaterAdd").addEventListener("click", addCustom);
+  $("#hlWaterInput").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } });
+  $("#hlWaterUndo").addEventListener("click", () => {
+    const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
+    if (last) hlWater(-last);
+  });
+  $("#hlWeekPrev").addEventListener("click", () => { hl.week = addDays(hl.week, -7); hl.weekSel = null; renderHealth(); });
+  $("#hlWeekNext").addEventListener("click", () => {
+    if (canGoNextWeek(hl.week, butlerToday(Date.now()))) { hl.week = addDays(hl.week, 7); hl.weekSel = null; renderHealth(); }
+  });
+  $("#hlWeightForm").addEventListener("submit", (e) => { e.preventDefault(); hlSaveWeight(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && activeTab === "health" && Date.now() - hl.lastTry > 60000) hlLoad(false);
+  });
+  renderWorkoutForm();
+  renderHealth();
+  if (activeTab === "health") hlOpen();
 })();
 </script>
 
