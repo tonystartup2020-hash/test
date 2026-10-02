@@ -577,7 +577,7 @@ body { padding-block: 20px 108px; }
           <button type="button" class="chip" id="hlW500" data-water="500">＋500</button>
           <button type="button" class="chip" id="hlW600" data-water="600">＋600</button>
           <button type="button" class="chip" id="hlW1000" data-water="1000">＋1000</button>
-          <button type="button" class="chip" id="hlFin">🥤 FIN 580</button>
+          <button type="button" class="chip" id="hlSport">🥤 運動飲料</button>
           <input type="number" class="hl-in" id="hlWaterInput" inputmode="numeric" min="1" max="5000" step="50" placeholder="cc" aria-label="自己輸入喝了幾 cc">
           <button type="button" class="chip" id="hlWaterAdd">加</button>
           <button type="button" class="chip" id="hlWaterUndo">減回去</button>
@@ -644,7 +644,7 @@ body { padding-block: 20px 108px; }
 
   <footer>
     <p>飲食請在對話裡拍照或打字跟管家說，記完回來按重新整理。照片裡有收據或價格的話，管家會一起記進「💸 收支紀錄」。</p>
-    <p>運動消耗不會加回可以吃的量。日常走路不用記，專程去走才記。喝水算水和運動飲料；按「🥤 FIN 580」會同時加 580 cc 水分，並把熱量記進飲食紀錄。</p>
+    <p>運動消耗不會加回可以吃的量。日常走路不用記，專程去走才記。喝水算水和運動飲料；按「🥤 運動飲料」會同時加一瓶 580 cc 的水分，並把熱量記進飲食紀錄。</p>
   </footer>
 </main>
 
@@ -2618,8 +2618,8 @@ const WORKOUT_DEFAULT_MIN = { "排球課": 120, "排球（朋友）": 120, "走�
 const GYM_DEFAULT = { lift: 60, cardio: 30 };
 const WEB_SOURCE = "網頁快速記";
 // One bottle of sports drink: its water counts toward 喝水, its calories go into 🍽️ 飲食紀錄 (守則 第 12 章「喝水」).
-// 黑松 FIN 補給飲料 580 ml label: 每瓶約 100 大卡、蛋白質 0、碳水 25.8 g、鈉 220 mg.
-const SPORTS_DRINK = { short: "FIN", name: "FIN 補給飲料", cc: 580, kcal: 100, protein: 0, detail: "黑松 FIN 補給飲料 1 瓶 580 ml（碳水 25.8 g、鈉 220 mg）" };
+// Numbers from the 黑松 FIN 補給飲料 580 ml label: 每瓶約 100 大卡、蛋白質 0、碳水 25.8 g、鈉 220 mg.
+const SPORTS_DRINK = { short: "運動飲料", name: "運動飲料", cc: 580, kcal: 100, protein: 0, detail: "運動飲料 1 瓶 580 ml（碳水 25.8 g、鈉 220 mg）" };
 // Where a date-only meal sorts among the day's meals.
 const MEAL_CLOCK = { "早餐": "07:00", "午餐": "12:00", "點心": "15:00", "飲料": "15:00", "晚餐": "18:30", "宵夜": "23:00" };
 
@@ -2973,7 +2973,7 @@ function renderWaterControls(today) {
   if (hl.waterUndo.day !== today) hl.waterUndo = { day: today, amounts: [] };
   const off = !hl.live;
   document.querySelectorAll("#tab-health [data-water]").forEach((b) => { b.disabled = off; });
-  $("#hlFin").disabled = off;
+  $("#hlSport").disabled = off;
   $("#hlWaterAdd").disabled = off;
   $("#hlWaterInput").disabled = off;
   const last = hl.waterUndo.amounts[hl.waterUndo.amounts.length - 1];
@@ -3050,7 +3050,7 @@ async function hlWaterWrite(delta, isUndo, drink, entry) {
     if (!meal.ok) {
       setNotice("hlNotice", isUndo ? `${drink.short}的熱量沒拿掉` : `${drink.short}的熱量沒記到`,
         isUndo ? "水已經減回去了，飲食那筆還在。跟管家說一聲，請他把那筆勾成測試資料。"
-          : "水已經記了，飲食紀錄那筆沒存進去。按重新整理看「今天吃的」，沒有的話跟管家說「喝了一瓶 FIN」補記熱量（不用再按一次，不然水會算兩次）。");
+          : "水已經記了，飲食紀錄那筆沒存進去。按重新整理看「今天吃的」，沒有的話跟管家說「喝了一瓶運動飲料」補記熱量（不用再按一次，不然水會算兩次）。");
     }
   };
   try {
@@ -3480,7 +3480,7 @@ function hlOpen() {
   $("#hlWaterAdd").addEventListener("click", addCustom);
   $("#hlWaterInput").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } });
   $("#hlWaterUndo").addEventListener("click", hlUndoWater);
-  $("#hlFin").addEventListener("click", () => hlWater(SPORTS_DRINK.cc, SPORTS_DRINK));
+  $("#hlSport").addEventListener("click", () => hlWater(SPORTS_DRINK.cc, SPORTS_DRINK));
   $("#hlWeekPrev").addEventListener("click", () => { hl.week = addDays(hl.week, -7); hl.weekSel = null; renderHealth(); });
   $("#hlWeekNext").addEventListener("click", () => {
     if (canGoNextWeek(hl.week, butlerToday(Date.now()))) { hl.week = addDays(hl.week, 7); hl.weekSel = null; renderHealth(); }
